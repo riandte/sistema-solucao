@@ -32,6 +32,12 @@ export interface PessoaResponse {
   Pessoa?: Pessoa
 }
 
+export interface PessoasResponse {
+  Sucesso: boolean
+  Pessoas?: Pessoa[]
+  Pessoa?: Pessoa // Fallback if API returns single object
+}
+
 export interface InserirPessoaResponse {
   Sucesso: boolean
   Numeros?: number[]
