@@ -4,6 +4,7 @@ import InputCliente from '@/components/form/InputCliente'
 import InputEndereco from '@/components/form/InputEndereco'
 import SelectPrioridade from '@/components/form/SelectPrioridade'
 import TextAreaServico from '@/components/form/TextAreaServico'
+import { Contrato } from '@/lib/locapp/types'
 
 import Link from 'next/link'
 import { ArrowLeft, Save, Calendar, User, Phone, Mail, FileText, CheckCircle, X, Printer, Edit, FileDigit, Briefcase } from 'lucide-react'
@@ -20,7 +21,7 @@ export default function NovaOSForm({ user }: { user: any }) {
   const [obs, setObs] = useState('')
   const [msg, setMsg] = useState<{ text: string; type: 'success' | 'error' | null }>({ text: '', type: null })
   
-  const [contracts, setContracts] = useState<any[]>([])
+  const [contracts, setContracts] = useState<Contrato[]>([])
   const [selectedContract, setSelectedContract] = useState('')
   const [loadingContracts, setLoadingContracts] = useState(false)
   const [showModal, setShowModal] = useState(false)
@@ -32,13 +33,9 @@ export default function NovaOSForm({ user }: { user: any }) {
       setLoadingContracts(true)
       fetch(`/api/locapp/contratos?cpfcnpj=${encodeURIComponent(cleanCnpj)}`)
         .then(res => res.json())
-        .then(data => {
-          // Handle different response structures
-          const list = data.Contratos || (Array.isArray(data) ? data : [])
-          // Filter active contracts if status available, otherwise show all
-          const active = list.filter((c: any) => !c.Status || c.Status === 'Ativo' || c.Status === 'Vigente') 
-          setContracts(active)
-          if (active.length === 1) setSelectedContract(active[0].Numero)
+        .then((data: Contrato[]) => {
+          setContracts(data)
+          if (data.length === 1) setSelectedContract(String(data[0].Numero))
         })
         .catch(err => {
             console.error(err)
@@ -284,7 +281,7 @@ export default function NovaOSForm({ user }: { user: any }) {
                                 onChange={e => setSelectedContract(e.target.value)}
                             >
                                 <option value="">Selecione um contrato...</option>
-                                {contracts.map((c: any) => (
+                                {contracts.map((c: Contrato) => (
                                     <option key={c.Numero} value={c.Numero}>
                                         Contrato #{c.Numero} - {c.Status || 'Ativo'} {c.DataEmissao ? `(${new Date(c.DataEmissao).toLocaleDateString('pt-BR')})` : ''}
                                     </option>

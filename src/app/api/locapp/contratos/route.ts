@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { listarContratosPorCnpj } from '../../../../lib/locapp/client'
+import { Contrato } from '../../../../lib/locapp/types'
 
 function validate(req: Request) {
   const expected = process.env.API_SECRET_KEY
@@ -17,14 +18,29 @@ export async function GET(req: Request) {
   if (cpfcnpj) {
     console.log(`[API] Buscando contratos para CNPJ: ${cpfcnpj}`)
     try {
-      const result = await listarContratosPorCnpj(cpfcnpj)
-      console.log(`[API] Contratos encontrados:`, result)
-      return NextResponse.json(result)
+      const raw = await listarContratosPorCnpj(cpfcnpj)
+      console.log(`[API] Resposta bruta LocApp:`, raw)
+
+      let list: Contrato[] = []
+      
+      // Normalize response structure
+      if (raw.Contrato && !Array.isArray(raw.Contrato)) {
+         list = [raw.Contrato]
+      } else if (raw.Contratos && Array.isArray(raw.Contratos)) {
+         list = raw.Contratos
+      } else if (Array.isArray(raw)) {
+         list = raw as Contrato[]
+      }
+
+      // Filter active contracts
+      const active = list.filter(c => !c.Status || c.Status === 'Ativo' || c.Status === 'Vigente')
+      
+      return NextResponse.json(active)
     } catch (err: any) {
       console.error(`[API] Erro ao buscar contratos:`, err)
-      return NextResponse.json({ Sucesso: false, Mensagem: 'erro interno ao buscar contratos por cnpj' }, { status: 500 })
+      return NextResponse.json({ error: 'Erro ao buscar contratos' }, { status: 500 })
     }
   }
 
-  return NextResponse.json({ Sucesso: false, Mensagem: 'Parâmetro cpfcnpj obrigatório' }, { status: 400 })
+  return NextResponse.json({ error: 'Parâmetro cpfcnpj obrigatório' }, { status: 400 })
 }

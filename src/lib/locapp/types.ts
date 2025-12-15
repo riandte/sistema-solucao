@@ -42,3 +42,13 @@ export interface InserirPessoaResponse {
   Sucesso: boolean
   Numeros?: number[]
 }
+
+export interface Contrato {
+  Id: string
+  Numero: number
+  CpfCnpj: string
+  Nome: string
+  DataEmissao: string
+  Status: string
+  ValorTotal: number
+}
