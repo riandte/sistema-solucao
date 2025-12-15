@@ -1,0 +1,35 @@
+"use client"
+
+import { useState } from 'react'
+import Sidebar from './Sidebar'
+import TopHeader from './TopHeader'
+
+interface AppShellProps {
+  children: React.ReactNode
+  user: {
+    name: string
+    email?: string
+  }
+}
+
+export default function AppShell({ children, user }: AppShellProps) {
+  const [collapsed, setCollapsed] = useState(true)
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-white flex">
+      {/* Sidebar */}
+      <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+
+      {/* Main Content Area */}
+      <div 
+        className={`flex-1 flex flex-col transition-all duration-300 ${collapsed ? 'ml-20' : 'ml-64'}`}
+      >
+        <TopHeader user={user} />
+        
+        <main className="flex-1 p-6 overflow-x-hidden">
+          {children}
+        </main>
+      </div>
+    </div>
+  )
+}

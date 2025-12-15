@@ -1,16 +1,29 @@
 # Solução Rental - Sistema de Gestão
 
-Sistema web moderno e integrado para gestão empresarial, desenvolvido sob medida para a **Solução Rental Ltda**. O sistema foca em eficiência, usabilidade e design moderno.
+Sistema web moderno e integrado para gestão empresarial, desenvolvido sob medida para a **Solução Rental Ltda**. O sistema foca em eficiência, usabilidade e design moderno, integrando-se diretamente ao ERP LocApp.
 
 ## 🚀 Funcionalidades
 
-Atualmente, o sistema conta com o módulo de **Ordens de Serviço (OS)**, permitindo:
+O sistema é composto por módulos integrados para otimizar o fluxo de trabalho:
 
+### 📋 Gestão de Contratos (Novo)
+Módulo completo para visualização e acompanhamento de contratos de locação.
+- **Listagem Geral**: Visualização de todos os contratos com indicadores visuais de status (Ativo/Vigente).
+- **Filtros Inteligentes**: Filtragem rápida por status (Ativos/Todos) e busca textual por número, cliente ou documento.
+- **Detalhamento Completo**: Tela de detalhes exibindo:
+  - Dados do cliente e períodos de vigência.
+  - Valores financeiros (Total, Faturamento).
+  - Endereço de entrega e obra.
+  - **Itens do Contrato**: Lista detalhada de equipamentos, quantidades e valores.
+  - Histórico de eventos e aditivos.
+
+### 🛠️ Ordens de Serviço (OS)
+Ferramenta para abertura e gestão de ordens de serviço.
 - **Criação de OS**: Formulário intuitivo para abertura de novas ordens.
+- **Vínculo com Contratos**: Seleção de contratos ativos diretamente na abertura da OS.
 - **Integração de Clientes**: Busca automática de clientes via CPF/CNPJ (integrado à base de dados LocApp).
+- **Numeração Personalizada**: Controle sequencial de OS por contrato (ex: 1234/1, 1234/2).
 - **Geração de Documentos**: Visualização e impressão automática da OS em formato PDF.
-- **Feedback Visual**: Confirmação de ações com modais interativos e modernos.
-- **Interface Responsiva**: Design adaptável para desktop e dispositivos móveis.
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -20,7 +33,7 @@ O projeto foi construído com as tecnologias mais recentes do mercado:
 - **[Tailwind CSS 4](https://tailwindcss.com/)**: Estilização utilitária avançada para um design moderno e customizável.
 - **[TypeScript](https://www.typescriptlang.org/)**: Superset JavaScript para maior segurança e manutenibilidade do código.
 - **[Lucide React](https://lucide.dev/)**: Biblioteca de ícones moderna e leve.
-- **Axios / Fetch API**: Para comunicação eficiente com APIs externas.
+- **Axios / Fetch API**: Para comunicação eficiente com APIs externas (LocApp).
 
 ## ⚙️ Configuração e Instalação
 

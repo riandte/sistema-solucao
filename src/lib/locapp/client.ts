@@ -1,6 +1,5 @@
 import axios from 'axios'
-import { formatDateBR } from './utils'
-import type { PessoaResponse, Pessoa, InserirPessoaResponse, TitulosPeriodoResponse, TituloPorIdResponse } from './types'
+import type { PessoaResponse, Pessoa, InserirPessoaResponse } from './types'
 import clientesPostman from './clientes_postman.json'
 
 function cfg() {
@@ -87,34 +86,13 @@ export async function pesquisarPessoas(termo: string) {
   }
 }
 
-export async function listarTitulos(dataInicial: Date, dataFinal: Date) {
-  const { base } = cfg()
-  if (!base) throw new Error('LOCAPP_BASE_URL ausente')
-  const url = `${base.replace(/\/$/, '')}/api/Titulo/Get?DataInicial=${encodeURIComponent(formatDateBR(dataInicial))}&DataFinal=${encodeURIComponent(formatDateBR(dataFinal))}`
-  const resp = await axios.get<TitulosPeriodoResponse>(url, { headers: headers(), timeout: 10000 })
-  return resp.data
-}
 
-export async function listarContratos(params: { numero?: string; dataInicial?: Date; dataFinal?: Date }) {
+export async function listarContratosPorCnpj(cpfCnpj: string) {
   const { base } = cfg()
   if (!base) throw new Error('LOCAPP_BASE_URL ausente')
-  const baseUrl = `${base.replace(/\/$/, '')}/api/Contrato/`
-  const qs: string[] = []
-  if (params.numero) qs.push(`Numero=${encodeURIComponent(params.numero)}`)
-  if (params.dataInicial && params.dataFinal) {
-    qs.push(`DataEmissaoInicial=${encodeURIComponent(formatDateBR(params.dataInicial))}`)
-    qs.push(`DataEmissaoFinal=${encodeURIComponent(formatDateBR(params.dataFinal))}`)
-  }
-  const url = `${baseUrl}?${qs.join('&')}`
+  // Try filtering by CpfCnpj if the API supports it
+  const url = `${base.replace(/\/$/, '')}/api/Contrato/Get?CpfCnpj=${encodeURIComponent(cpfCnpj)}`
   const resp = await axios.get(url, { headers: headers(), timeout: 10000 })
-  return resp.data
-}
-
-export async function consultarTituloPorId(id: string) {
-  const { base } = cfg()
-  if (!base) throw new Error('LOCAPP_BASE_URL ausente')
-  const url = `${base.replace(/\/$/, '')}/api/Titulo/Get/${encodeURIComponent(id)}`
-  const resp = await axios.get<TituloPorIdResponse>(url, { headers: headers(), timeout: 10000 })
   return resp.data
 }
 

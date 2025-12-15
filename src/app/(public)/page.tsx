@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ClipboardList, ArrowRight } from 'lucide-react'
+import { ClipboardList, ArrowRight, FileText, DollarSign } from 'lucide-react'
 
 export default function Home() {
   return (
@@ -26,11 +26,11 @@ export default function Home() {
                 </div>
                 
                 <h2 className="text-2xl font-bold mb-2 group-hover:text-blue-400 transition-colors">
-                  Sistema de OS
+                  Ordens de Serviço
                 </h2>
                 
                 <div className="flex items-center gap-2 text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
-                  <span>Acessar módulo</span>
+                  <span>Gerenciar chamados</span>
                   <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>

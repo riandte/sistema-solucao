@@ -42,32 +42,3 @@ export interface InserirPessoaResponse {
   Sucesso: boolean
   Numeros?: number[]
 }
-
-export interface Titulo {
-  Id: string
-  Numero: number
-  CpfCnpj: string
-  Tipo: string
-  DataEmissao: string
-  DataVencimento: string
-  DataBaixa?: string | null
-  Historico?: string | null
-  Status: string
-  TipoDocumento?: string | null
-  NumDocOrigem?: string | null
-  Parcela?: number
-  FormaPagamento?: string | null
-  Valor?: number
-  ValorLiquido?: number
-  Saldo?: number
-}
-
-export interface TitulosPeriodoResponse {
-  Sucesso: boolean
-  Titulos: Titulo[]
-}
-
-export interface TituloPorIdResponse {
-  Sucesso: boolean
-  Titulos: Titulo
-}

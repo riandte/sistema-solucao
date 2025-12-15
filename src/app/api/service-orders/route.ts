@@ -7,17 +7,34 @@ let nextId = 1
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const base = process.env.LOCAPP_BASE_URL
-    const path = process.env.API_SERVICE_ORDER_PATH || 'api/Pessoa/InsertOrUpdate'
-    if (base) {
-      const h: Record<string, string> = { 'Content-Type': 'application/json' }
-      if (process.env.LOCAPP_CNPJ) h['x-api-key'] = process.env.LOCAPP_CNPJ as string
-      if (process.env.LOCAPP_SECRET) h['x-api-secret'] = process.env.LOCAPP_SECRET as string
-      const payload = /Pessoa\/InsertOrUpdate$/.test(path) ? [body] : body
-      const resp = await axios.post(`${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`, payload, { headers: h })
-      return NextResponse.json(resp.data, { status: resp.status })
+    
+    // NOTE: Proxy logic disabled to support local OS management and custom numbering
+    // const base = process.env.LOCAPP_BASE_URL
+    // const path = process.env.API_SERVICE_ORDER_PATH || 'api/Pessoa/InsertOrUpdate'
+    // if (base) {
+    //   const h: Record<string, string> = { 'Content-Type': 'application/json' }
+    //   if (process.env.LOCAPP_CNPJ) h['x-api-key'] = process.env.LOCAPP_CNPJ as string
+    //   if (process.env.LOCAPP_SECRET) h['x-api-secret'] = process.env.LOCAPP_SECRET as string
+    //   const payload = /Pessoa\/InsertOrUpdate$/.test(path) ? [body] : body
+    //   const resp = await axios.post(`${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`, payload, { headers: h })
+    //   return NextResponse.json(resp.data, { status: resp.status })
+    // }
+
+    let id = String(nextId++)
+    if (body.Contrato) {
+        const contractOrders = store.filter(o => o.Contrato === body.Contrato)
+        let maxSeq = 0
+        for (const o of contractOrders) {
+            const parts = String(o.id).split('-')
+            if (parts.length === 2 && parts[0] === String(body.Contrato)) {
+                const seq = parseInt(parts[1], 10)
+                if (!isNaN(seq) && seq > maxSeq) maxSeq = seq
+            }
+        }
+        id = `${body.Contrato}-${maxSeq + 1}`
     }
-    const order = { id: String(nextId++), ...body, createdAt: new Date().toISOString() }
+
+    const order = { id, ...body, createdAt: new Date().toISOString() }
     store.push(order)
     return NextResponse.json(order, { status: 201 })
   } catch (err: any) {

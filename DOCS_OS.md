@@ -85,6 +85,3 @@ A funcionalidade de impressão é executada inteiramente no cliente (Client-side
 - Injeta HTML/CSS específico para impressão (fundo branco, tipografia serifada/simples).
 - Aciona o diálogo de impressão do sistema operacional.
 - Garante que documentos físicos tenham layout profissional, independente do tema escuro da aplicação.
-
----
-*Documentação gerada automaticamente por Trae AI.*
