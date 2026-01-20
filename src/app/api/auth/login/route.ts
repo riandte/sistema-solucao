@@ -1,48 +1,36 @@
 import { NextResponse } from 'next/server'
 import { SignJWT } from 'jose'
+import { RoleName } from '@/lib/types'
+import { MockUserStore } from '@/lib/auth/mockUsers'
 
 // Mock authentication function - Replace this with actual AD/LDAP logic
 async function authenticateUser(username: string, pass: string) {
-  // -------------------------------------------------------------------------
-  // AD Integration Example (using 'activedirectory2' or 'ldapjs'):
-  // -------------------------------------------------------------------------
-  // const ActiveDirectory = require('activedirectory2');
-  // const config = {
-  //   url: process.env.LDAP_URL || 'ldap://dc.domain.com',
-  //   baseDN: process.env.LDAP_BASE_DN || 'dc=domain,dc=com',
-  //   username: process.env.LDAP_USER, // Service account to bind
-  //   password: process.env.LDAP_PASSWORD
-  // };
-  // const ad = new ActiveDirectory(config);
-  // 
-  // return new Promise((resolve) => {
-  //   ad.authenticate(username + '@domain.com', pass, function(err, auth) {
-  //     if (err) {
-  //       console.error('AD Auth Error:', err);
-  //       resolve(null);
-  //       return;
-  //     }
-  //     if (auth) {
-  //       // Optional: Get user details
-  //       // ad.findUser(username, function(err, user) { resolve(user); });
-  //       resolve({ name: username, email: `${username}@domain.com` });
-  //     } else {
-  //       resolve(null);
-  //     }
-  //   });
-  // });
-  // -------------------------------------------------------------------------
+  const users = await MockUserStore.getAll();
+  
+  // Busca por email ou nome (case insensitive simples)
+  const user = users.find(u => 
+    (u.email.toLowerCase() === username.toLowerCase() || u.name.toLowerCase() === username.toLowerCase())
+  );
 
-  // For now, accept a default test user or any user with password '123456'
-  // Or match against an env var
-  const validUser = 'admin'
-  const validPass = process.env.ADMIN_PASSWORD || '123456'
+  if (!user) return null;
 
-  if ((username === validUser && pass === validPass) || (pass === '123456')) {
-     return { name: username, email: 'admin@solucao.com.br', role: 'admin' }
+  // Validação de senha (mock: aceita a senha do usuário ou '123456' como master pass de dev)
+  const isPasswordValid = user.password === pass || pass === '123456';
+  
+  if (!isPasswordValid) return null;
+
+  // Validação de Status
+  if (!user.active) {
+    console.warn(`Tentativa de login de usuário inativo: ${username}`);
+    return 'INACTIVE';
   }
 
-  return null
+  return { 
+    id: user.id,
+    name: user.name, 
+    email: user.email, 
+    roles: user.roles 
+  }
 }
 
 export async function POST(req: Request) {
@@ -54,11 +42,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, message: 'Usuário e senha obrigatórios' }, { status: 400 })
     }
 
-    const user = await authenticateUser(username, password)
+    const result = await authenticateUser(username, password)
 
-    if (!user) {
+    if (!result) {
       return NextResponse.json({ success: false, message: 'Usuário ou senha inválidos' }, { status: 401 })
     }
+
+    if (result === 'INACTIVE') {
+      return NextResponse.json({ success: false, message: 'Conta desativada. Contate o administrador.' }, { status: 403 })
+    }
+
+    const user = result;
 
     // Create JWT Token
     const secret = new TextEncoder().encode(

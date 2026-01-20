@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { LogOut, User as UserIcon, Loader2 } from 'lucide-react'
+import { LogOut, User as UserIcon, Loader2, Settings } from 'lucide-react'
+import Link from 'next/link'
 
 interface UserMenuProps {
   user: {
@@ -47,7 +48,7 @@ export default function UserMenu({ user }: UserMenuProps) {
         onClick={() => setShowMenu(!showMenu)}
         className="flex items-center gap-3 hover:bg-white/5 p-2 rounded-xl transition-colors group outline-none"
       >
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
+        <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
           <span className="font-bold text-white text-sm tracking-wider">{initials}</span>
         </div>
         <div className="text-left hidden md:block">
@@ -67,6 +68,15 @@ export default function UserMenu({ user }: UserMenuProps) {
                 <p className="text-sm font-medium text-white">{displayName}</p>
              </div>
              
+             <Link
+                href="/configuracoes"
+                onClick={() => setShowMenu(false)}
+                className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2"
+             >
+                <Settings size={16} />
+                Configurações
+             </Link>
+
              <button 
                 onClick={handleLogout}
                 disabled={loading}

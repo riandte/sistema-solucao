@@ -1,0 +1,57 @@
+[
+  {
+    "titulo": "OS #1 - João da Silva Construções e Obras Ltda.",
+    "descricao": "Gerado automaticamente via OS",
+    "tipo": "OS",
+    "status": "PENDENTE",
+    "prioridade": "MEDIA",
+    "origemId": "1",
+    "origemTipo": "OS",
+    "criadoPor": "sistema",
+    "tags": [
+      "João da Silva Construções e Obras Ltda."
+    ],
+    "id": "4336225a-6b62-479d-85da-06290244dd17",
+    "dataCriacao": "2026-01-20T16:18:11.289Z"
+  },
+  {
+    "titulo": "OS #2 - João da Silva Construções e Obras Ltda.",
+    "descricao": "Gerado automaticamente via OS",
+    "tipo": "OS",
+    "status": "PENDENTE",
+    "prioridade": "ALTA",
+    "origemId": "2",
+    "origemTipo": "OS",
+    "criadoPor": "sistema",
+    "tags": [
+      "João da Silva Construções e Obras Ltda."
+    ],
+    "id": "52940c2e-541f-4da4-84cd-ada72dad9e51",
+    "dataCriacao": "2026-01-20T16:18:42.659Z"
+  },
+  {
+    "titulo": "Técnico de edificações",
+    "descricao": "teste",
+    "tipo": "ADMINISTRATIVO",
+    "status": "PENDENTE",
+    "prioridade": "MEDIA",
+    "criadoPor": "usuario-logado",
+    "dataPrevisao": "2026-01-21",
+    "tags": [],
+    "id": "9797e2da-c54b-4c3a-8bce-79b62db9b0ce",
+    "dataCriacao": "2026-01-20T17:17:35.341Z"
+  },
+  {
+    "titulo": "Preciso de ajuda no sistema",
+    "descricao": "não estou conseguindo emitir nota fiscal pelo sistema",
+    "tipo": "TI",
+    "status": "PENDENTE",
+    "prioridade": "ALTA",
+    "criadoPor": "admin-id-123",
+    "origemTipo": "MANUAL",
+    "dataPrevisao": "",
+    "tags": [],
+    "id": "6890fb00-82b6-4147-bcbf-13dbe3db5293",
+    "dataCriacao": "2026-01-20T18:47:41.235Z"
+  }
+]

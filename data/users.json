@@ -1,0 +1,94 @@
+[
+  {
+    "id": "admin-id-123",
+    "name": "Rian Duarte Matos de Oliveira",
+    "email": "admin@solucao.com.br",
+    "password": "123",
+    "roles": [
+      "ADMIN"
+    ],
+    "active": true,
+    "configuracoes": {
+      "kanbanAtivo": false,
+      "impressaoAutomatica": false,
+      "modoRestrito": false,
+      "exibirPendenciasGlobais": false,
+      "modoManutencao": false
+    },
+    "parametros": {
+      "densidadeUI": "compact",
+      "tema": "light",
+      "colunasKanbanVisiveis": [
+        "PENDENTE",
+        "EM_ANDAMENTO",
+        "CONCLUIDO"
+      ],
+      "filtrosPadrao": {},
+      "idioma": "en-US",
+      "timezone": "America/Sao_Paulo"
+    },
+    "createdAt": "2026-01-20T17:55:46.637Z",
+    "updatedAt": "2026-01-20T18:27:43.655Z"
+  },
+  {
+    "id": "op-id-456",
+    "name": "Wellinton Sales",
+    "email": "financeiro@solucaoloc.com.br",
+    "password": "123456",
+    "roles": [
+      "OPERADOR"
+    ],
+    "active": true,
+    "configuracoes": {
+      "kanbanAtivo": true,
+      "impressaoAutomatica": false,
+      "modoRestrito": false,
+      "exibirPendenciasGlobais": false,
+      "modoManutencao": false
+    },
+    "parametros": {
+      "densidadeUI": "comfortable",
+      "tema": "system",
+      "colunasKanbanVisiveis": [
+        "PENDENTE",
+        "EM_ANDAMENTO",
+        "CONCLUIDO"
+      ],
+      "filtrosPadrao": {},
+      "idioma": "pt-BR",
+      "timezone": "America/Sao_Paulo"
+    },
+    "createdAt": "2026-01-20T17:55:46.637Z",
+    "role": "OPERADOR"
+  },
+  {
+    "id": "user-id-789",
+    "name": "Usuario",
+    "email": "user@solucao.com.br",
+    "password": "123",
+    "roles": [
+      "USUARIO"
+    ],
+    "active": true,
+    "configuracoes": {
+      "kanbanAtivo": true,
+      "impressaoAutomatica": false,
+      "modoRestrito": false,
+      "exibirPendenciasGlobais": false,
+      "modoManutencao": false
+    },
+    "parametros": {
+      "densidadeUI": "comfortable",
+      "tema": "system",
+      "colunasKanbanVisiveis": [
+        "PENDENTE",
+        "EM_ANDAMENTO",
+        "CONCLUIDO"
+      ],
+      "filtrosPadrao": {},
+      "idioma": "pt-BR",
+      "timezone": "America/Sao_Paulo"
+    },
+    "createdAt": "2026-01-20T17:55:46.637Z"
+  }
+]

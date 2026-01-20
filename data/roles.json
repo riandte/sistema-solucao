@@ -1,0 +1,50 @@
+[
+  {
+    "name": "ADMIN",
+    "description": "Administrador do Sistema (Acesso Total)",
+    "isSystem": true,
+    "permissions": [
+      "PENDENCIA:LER_TODAS",
+      "PENDENCIA:CRIAR",
+      "PENDENCIA:EDITAR",
+      "PENDENCIA:MOVER",
+      "PENDENCIA:CONCLUIR",
+      "PENDENCIA:CANCELAR",
+      "PENDENCIA:ATRIBUIR_RESPONSAVEL",
+      "USUARIO:GERENCIAR",
+      "OS:CRIAR"
+    ]
+  },
+  {
+    "name": "OPERADOR",
+    "description": "Operador Padrão",
+    "isSystem": true,
+    "permissions": [
+      "PENDENCIA:LER_TODAS",
+      "PENDENCIA:CRIAR",
+      "PENDENCIA:EDITAR",
+      "PENDENCIA:MOVER",
+      "PENDENCIA:CONCLUIR",
+      "PENDENCIA:ATRIBUIR_RESPONSAVEL",
+      "OS:CRIAR"
+    ]
+  },
+  {
+    "name": "USUARIO",
+    "description": "Usuário Básico",
+    "isSystem": true,
+    "permissions": [
+      "PENDENCIA:CRIAR",
+      "PENDENCIA:CANCELAR"
+    ]
+  },
+  {
+    "name": "SISTEMA",
+    "description": "Processos Internos",
+    "isSystem": true,
+    "permissions": [
+      "PENDENCIA:LER_TODAS",
+      "PENDENCIA:CRIAR"
+    ]
+  }
+]

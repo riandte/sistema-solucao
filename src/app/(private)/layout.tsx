@@ -9,13 +9,17 @@ export default async function PrivateLayout({
 }) {
   const cookieStore = await cookies()
   const token = cookieStore.get('auth_token')?.value
-  let user = { name: 'Usuário', email: '' }
+  let user = { name: 'Usuário', email: '', roles: [] as string[] }
 
   if (token) {
     try {
       const secret = new TextEncoder().encode(process.env.JWT_SECRET_KEY || 'default-secret-key-change-me-in-prod')
       const { payload } = await jwtVerify(token, secret)
-      user = { name: (payload.name as string) || 'Usuário', email: (payload.email as string) || '' }
+      user = { 
+        name: (payload.name as string) || 'Usuário', 
+        email: (payload.email as string) || '',
+        roles: (payload.roles as string[]) || []
+      }
     } catch {}
   }
 
