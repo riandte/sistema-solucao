@@ -3,7 +3,7 @@
     "id": "admin-id-123",
     "name": "Rian Duarte Matos de Oliveira",
     "email": "admin@solucao.com.br",
-    "password": "123",
+    "password": "",
     "roles": [
       "ADMIN"
     ],
@@ -28,7 +28,10 @@
       "timezone": "America/Sao_Paulo"
     },
     "createdAt": "2026-01-20T17:55:46.637Z",
-    "updatedAt": "2026-01-20T18:27:43.655Z"
+    "updatedAt": "2026-01-20T18:27:43.655Z",
+    "role": "ADMIN",
+    "setorId": "setor-ti",
+    "cargoId": "cargo-gerente-ti"
   },
   {
     "id": "op-id-456",
@@ -59,7 +62,9 @@
       "timezone": "America/Sao_Paulo"
     },
     "createdAt": "2026-01-20T17:55:46.637Z",
-    "role": "OPERADOR"
+    "role": "OPERADOR",
+    "setorId": "setor-financeiro",
+    "cargoId": "cargo-gerente-geral"
   },
   {
     "id": "user-id-789",
@@ -95,7 +100,7 @@
     "id": "3a5dbc1d-5027-4842-bc5f-3722e729630d",
     "name": "Rian Duarte Matos de Oliveira",
     "email": "TI@SOLUCAOLOC.COM.BR",
-    "password": "",
+    "password": "123456",
     "roles": [
       "ADMIN"
     ],
@@ -121,5 +126,68 @@
     },
     "createdAt": "2026-01-20T22:43:46.722Z",
     "role": "ADMIN"
+  },
+  {
+    "id": "d1cacaea-badf-4eda-8474-062caa953c43",
+    "name": "Sannderson",
+    "email": "administrativo@solucaoloc.com.br",
+    "password": "",
+    "roles": [
+      "USUARIO"
+    ],
+    "active": true,
+    "configuracoes": {
+      "kanbanAtivo": true,
+      "impressaoAutomatica": false,
+      "modoRestrito": false,
+      "exibirPendenciasGlobais": false,
+      "modoManutencao": false
+    },
+    "parametros": {
+      "densidadeUI": "comfortable",
+      "tema": "system",
+      "colunasKanbanVisiveis": [
+        "PENDENTE",
+        "EM_ANDAMENTO",
+        "CONCLUIDO"
+      ],
+      "filtrosPadrao": {},
+      "idioma": "pt-BR",
+      "timezone": "America/Sao_Paulo"
+    },
+    "createdAt": "2026-01-21T11:20:59.386Z",
+    "role": "USUARIO",
+    "setorId": "setor-1769000452695",
+    "cargoId": "cargo-analista-financeiro"
+  },
+  {
+    "id": "1895aa9a-de9e-4266-92e2-5d9139bcd08a",
+    "name": "Renato",
+    "email": "iuewfiwef@iudsfgbiuewf.com",
+    "password": "123",
+    "roles": [
+      "USUARIO"
+    ],
+    "active": true,
+    "configuracoes": {
+      "kanbanAtivo": true,
+      "impressaoAutomatica": false,
+      "modoRestrito": false,
+      "exibirPendenciasGlobais": false,
+      "modoManutencao": false
+    },
+    "parametros": {
+      "densidadeUI": "comfortable",
+      "tema": "system",
+      "colunasKanbanVisiveis": [
+        "PENDENTE",
+        "EM_ANDAMENTO",
+        "CONCLUIDO"
+      ],
+      "filtrosPadrao": {},
+      "idioma": "pt-BR",
+      "timezone": "America/Sao_Paulo"
+    },
+    "createdAt": "2026-01-21T14:59:16.206Z"
   }
 ]

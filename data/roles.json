@@ -34,8 +34,11 @@
     "description": "Usuário Básico",
     "isSystem": true,
     "permissions": [
+      "PENDENCIA:CANCELAR",
       "PENDENCIA:CRIAR",
-      "PENDENCIA:CANCELAR"
+      "PENDENCIA:MOVER",
+      "PENDENCIA:CONCLUIR",
+      "PENDENCIA:ATRIBUIR_RESPONSAVEL"
     ]
   },
   {

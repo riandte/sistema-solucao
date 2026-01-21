@@ -137,7 +137,7 @@
     "titulo": "OS #1-1 - João da Silva Construções e Obras Ltda.",
     "descricao": "onfjrbfbdshkb",
     "tipo": "OS",
-    "status": "PENDENTE",
+    "status": "CONCLUIDO",
     "prioridade": "ALTA",
     "origemId": "1-1",
     "origemTipo": "OS",
@@ -148,14 +148,17 @@
       "Contrato: 1"
     ],
     "id": "f151858b-8850-45a5-a91c-6950b2f40dfc",
-    "dataCriacao": "2026-01-20T22:51:08.010Z"
+    "dataCriacao": "2026-01-20T22:51:08.010Z",
+    "dataAtualizacao": "2026-01-21T14:53:12.547Z",
+    "tipoEncerramento": "CONCLUIDO",
+    "dataConclusao": "2026-01-21T14:53:12.547Z"
   },
   {
     "id": "ca5e3c07-57e9-40b8-8e1b-ffcb919da528",
     "titulo": "Faturamento OS #1-1",
     "descricao": "Gerado automaticamente após conclusão da OS #1-1. Referência: OS #1-1 - João da Silva Construções e Obras Ltda.",
     "tipo": "FINANCEIRO",
-    "status": "PENDENTE",
+    "status": "EM_ANDAMENTO",
     "prioridade": "MEDIA",
     "origemId": "1-1",
     "origemTipo": "OS",
@@ -165,7 +168,8 @@
       "AUTOMACAO",
       "FINANCEIRO",
       "OS-1-1"
-    ]
+    ],
+    "dataAtualizacao": "2026-01-21T11:17:08.365Z"
   },
   {
     "titulo": "OS #1-2 - João da Silva Construções e Obras Ltda.",
@@ -206,7 +210,7 @@
     "titulo": "OS #1-1 - João da Silva Construções e Obras Ltda.",
     "descricao": "teste",
     "tipo": "OS",
-    "status": "PENDENTE",
+    "status": "CONCLUIDO",
     "prioridade": "BAIXA",
     "origemId": "1-1",
     "origemTipo": "OS",
@@ -217,7 +221,10 @@
     ],
     "responsavelId": "admin-id-123",
     "id": "450fac76-5395-4c16-850a-9cd156a50a75",
-    "dataCriacao": "2026-01-20T23:41:41.898Z"
+    "dataCriacao": "2026-01-20T23:41:41.898Z",
+    "dataAtualizacao": "2026-01-21T12:49:18.331Z",
+    "tipoEncerramento": "CONCLUIDO",
+    "dataConclusao": "2026-01-21T12:49:18.331Z"
   },
   {
     "id": "c4ea5b45-19e2-469a-8c6b-6ab0b503e547",
@@ -241,7 +248,7 @@
     "titulo": "Preciso de ajuda no sistema",
     "descricao": "teste",
     "tipo": "TI",
-    "status": "PENDENTE",
+    "status": "EM_ANDAMENTO",
     "prioridade": "ALTA",
     "setorResponsavel": "COMERCIAL",
     "criadoPor": "admin-id-123",
@@ -249,6 +256,140 @@
     "dataPrevisao": "",
     "tags": [],
     "id": "2cff843a-7d71-47fc-a517-afa78ed15412",
-    "dataCriacao": "2026-01-20T23:43:06.843Z"
+    "dataCriacao": "2026-01-20T23:43:06.843Z",
+    "dataAtualizacao": "2026-01-21T11:16:11.957Z"
+  },
+  {
+    "titulo": "OS #1 - João da Silva Construções e Obras Ltda.",
+    "descricao": "TESTE",
+    "tipo": "OS",
+    "status": "CONCLUIDO",
+    "prioridade": "BAIXA",
+    "origemId": "1",
+    "origemTipo": "OS",
+    "criadoPor": "admin-id-123",
+    "dataPrevisao": "2026-01-22",
+    "tags": [
+      "João da Silva Construções e Obras Ltda."
+    ],
+    "responsavelId": "admin-id-123",
+    "id": "1a8a38de-3f94-4af1-ab68-9bd1e9739b2e",
+    "dataCriacao": "2026-01-21T11:16:38.182Z",
+    "dataAtualizacao": "2026-01-21T11:17:49.069Z",
+    "tipoEncerramento": "CONCLUIDO",
+    "dataConclusao": "2026-01-21T11:17:49.069Z"
+  },
+  {
+    "id": "0f7bfe83-c9b2-461e-9449-4f3ce94820ed",
+    "titulo": "Faturamento OS #1",
+    "descricao": "Gerado automaticamente após conclusão da OS #1. Referência: OS #1 - João da Silva Construções e Obras Ltda.",
+    "tipo": "FINANCEIRO",
+    "status": "CONCLUIDO",
+    "prioridade": "MEDIA",
+    "origemId": "1",
+    "origemTipo": "OS",
+    "criadoPor": "system-automation",
+    "dataCriacao": "2026-01-21T11:17:49.069Z",
+    "tags": [
+      "AUTOMACAO",
+      "FINANCEIRO",
+      "OS-1"
+    ],
+    "dataAtualizacao": "2026-01-21T11:18:19.913Z",
+    "tipoEncerramento": "CONCLUIDO",
+    "dataConclusao": "2026-01-21T11:18:19.913Z"
+  },
+  {
+    "titulo": "dificuldade a gera nfse",
+    "descricao": "Estou ocm dificuldade na emissão de notas",
+    "tipo": "TI",
+    "status": "PENDENTE",
+    "prioridade": "ALTA",
+    "setorResponsavel": "TI",
+    "criadoPor": "admin-id-123",
+    "origemTipo": "MANUAL",
+    "dataPrevisao": "",
+    "tags": [],
+    "id": "ec2954b9-cd75-493e-b5e4-d56889f10df4",
+    "dataCriacao": "2026-01-21T11:19:44.101Z"
+  },
+  {
+    "id": "a8e4326e-7fb3-4641-938a-8c28272bb512",
+    "titulo": "Faturamento OS #1-1",
+    "descricao": "Gerado automaticamente após conclusão da OS #1-1. Referência: OS #1-1 - João da Silva Construções e Obras Ltda.",
+    "tipo": "FINANCEIRO",
+    "status": "PENDENTE",
+    "prioridade": "MEDIA",
+    "origemId": "1-1",
+    "origemTipo": "OS",
+    "criadoPor": "system-automation",
+    "dataCriacao": "2026-01-21T12:49:18.331Z",
+    "tags": [
+      "AUTOMACAO",
+      "FINANCEIRO",
+      "OS-1-1"
+    ]
+  },
+  {
+    "titulo": "Preciso de ajuda no sistema",
+    "descricao": "Não consigo emitir nota",
+    "tipo": "TI",
+    "status": "PENDENTE",
+    "prioridade": "BAIXA",
+    "responsavelId": "123",
+    "criadoPor": "admin-id-123",
+    "origemTipo": "MANUAL",
+    "dataPrevisao": "",
+    "tags": [],
+    "id": "e8dd80f5-fa70-4329-bd17-a796fad92638",
+    "dataCriacao": "2026-01-21T12:50:19.453Z"
+  },
+  {
+    "titulo": "Preciso de ajuda no sistema",
+    "descricao": "",
+    "tipo": "OUTRO",
+    "status": "EM_ANDAMENTO",
+    "prioridade": "BAIXA",
+    "responsavelId": "d1cacaea-badf-4eda-8474-062caa953c43",
+    "criadoPor": "admin-id-123",
+    "origemTipo": "MANUAL",
+    "dataPrevisao": "",
+    "tags": [],
+    "id": "146257ee-5e79-4e58-9953-559bfcce686d",
+    "dataCriacao": "2026-01-21T14:02:01.584Z",
+    "dataAtualizacao": "2026-01-21T14:02:11.626Z"
+  },
+  {
+    "titulo": "OS #1 - João da Silva Construções e Obras Ltda.",
+    "descricao": "Gerado automaticamente via OS",
+    "tipo": "OS",
+    "status": "PENDENTE",
+    "prioridade": "MEDIA",
+    "origemId": "1",
+    "origemTipo": "OS",
+    "criadoPor": "admin-id-123",
+    "tags": [
+      "João da Silva Construções e Obras Ltda."
+    ],
+    "responsavelId": "admin-id-123",
+    "id": "50257e52-63d9-40fe-84dc-3ce3eda179a9",
+    "dataCriacao": "2026-01-21T14:11:18.029Z"
+  },
+  {
+    "id": "81ee51ee-488a-4776-98d6-80a4aeb5f5d6",
+    "titulo": "Faturamento OS #1-1",
+    "descricao": "Gerado automaticamente após conclusão da OS #1-1. Referência: OS #1-1 - João da Silva Construções e Obras Ltda.",
+    "tipo": "FINANCEIRO",
+    "status": "PENDENTE",
+    "prioridade": "MEDIA",
+    "origemId": "1-1",
+    "origemTipo": "OS",
+    "criadoPor": "system-automation",
+    "dataCriacao": "2026-01-21T14:53:12.547Z",
+    "tags": [
+      "AUTOMACAO",
+      "FINANCEIRO",
+      "OS-1-1"
+    ]
   }
 ]

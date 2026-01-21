@@ -38,6 +38,21 @@ export async function GET(req: Request) {
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  // REGRA: Usuário deve estar vinculado a Cargo e Setor para visualizar demandas (exceto Admin/Sistema)
+  const isAdmin = session.user.roles.includes('ADMIN');
+  const isSystem = session.user.roles.includes('SISTEMA');
+
+  if (!isAdmin && !isSystem) {
+      if (!session.user.funcionario) {
+          return NextResponse.json(
+            { error: 'Acesso negado. É necessário estar vinculado a um Cargo e Setor para visualizar demandas.' }, 
+            { status: 403 }
+          );
+      }
+      // Futuro: Implementar filtro de escopo para OS aqui também
+  }
+
   return NextResponse.json(store);
 }
 

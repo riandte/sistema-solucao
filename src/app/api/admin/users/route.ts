@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { UserService } from '@/lib/services/userService';
 import { AuthContext } from '@/lib/auth/authContext';
+import { MockFuncionarioStore } from '@/lib/org/funcionarios';
+import { randomUUID } from 'crypto';
 
 // Helper simples para obter contexto (MOCK)
 // Em produção, isso viria do JWT/Session middleware
@@ -67,6 +69,21 @@ export async function POST(req: NextRequest) {
     const context = await getContext(req);
     const data = await req.json();
     const user = await UserService.criar(data, context);
+    
+    // Auto-create Funcionario if cargo/setor provided
+    if (data.cargoId && data.setorId) {
+        await MockFuncionarioStore.save({
+            id: randomUUID(),
+            nome: user.name,
+            emailCorporativo: user.email,
+            cargoId: data.cargoId,
+            setorId: data.setorId,
+            usuarioId: user.id,
+            ativo: true,
+            createdAt: new Date().toISOString()
+        });
+    }
+
     return NextResponse.json(user);
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 403 });

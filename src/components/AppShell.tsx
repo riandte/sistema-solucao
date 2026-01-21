@@ -3,14 +3,11 @@
 import { useState } from 'react'
 import Sidebar from './Sidebar'
 import TopHeader from './TopHeader'
+import { UserSession } from '@/lib/auth/authContext'
 
 interface AppShellProps {
   children: React.ReactNode
-  user: {
-    name: string
-    email?: string
-    roles: string[]
-  }
+  user: UserSession
 }
 
 export default function AppShell({ children, user }: AppShellProps) {

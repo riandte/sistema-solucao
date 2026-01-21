@@ -1,4 +1,4 @@
-import { RoleName } from '@/lib/types';
+import { RoleName, Funcionario, Cargo, Setor } from '@/lib/types';
 import { SystemConfig } from '@/lib/config/systemConfig';
 import { UserParameters } from '@/lib/config/systemParameters';
 
@@ -7,6 +7,13 @@ export interface UserSession {
   name: string;
   email: string;
   roles: RoleName[];
+  // Dados do Funcionário Vinculado (Competência)
+  funcionario?: {
+    id: string;
+    setorId: string;
+    cargoId: string;
+    escopo: 'INDIVIDUAL' | 'SETORIAL';
+  };
 }
 
 export interface AuthContext {
@@ -15,6 +22,7 @@ export interface AuthContext {
 
 /**
  * Entidade Completa de Usuário (Persistência)
+ * ... mantendo o resto igual
  */
 export interface User {
   id: string;

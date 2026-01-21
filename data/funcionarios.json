@@ -1,0 +1,52 @@
+[
+  {
+    "id": "func-admin",
+    "nome": "Rian Duarte Matos de Oliveira",
+    "emailCorporativo": "admin@solucao.com.br",
+    "setorId": "setor-ti",
+    "cargoId": "cargo-gerente-ti",
+    "usuarioId": "admin-id-123",
+    "ativo": true,
+    "createdAt": "2026-01-21T12:38:49.933Z"
+  },
+  {
+    "id": "func-rian",
+    "nome": "Rian Duarte",
+    "emailCorporativo": "ti@solucaoloc.com.br",
+    "setorId": "setor-ti",
+    "cargoId": "cargo-gerente-ti",
+    "usuarioId": "3a5dbc1d-5027-4842-bc5f-3722e729630d",
+    "ativo": true,
+    "createdAt": "2026-01-21T12:38:49.933Z"
+  },
+  {
+    "id": "func-wellinton",
+    "nome": "Wellinton Sales",
+    "emailCorporativo": "financeiro@solucaoloc.com.br",
+    "setorId": "setor-financeiro",
+    "cargoId": "cargo-gerente-geral",
+    "usuarioId": "op-id-456",
+    "ativo": true,
+    "createdAt": "2026-01-21T12:38:49.933Z"
+  },
+  {
+    "id": "func-sannderson",
+    "nome": "Sannderson",
+    "emailCorporativo": "administrativo@solucaoloc.com.br",
+    "setorId": "setor-1769000452695",
+    "cargoId": "cargo-analista-financeiro",
+    "usuarioId": "d1cacaea-badf-4eda-8474-062caa953c43",
+    "ativo": true,
+    "createdAt": "2026-01-21T12:38:49.933Z"
+  },
+  {
+    "id": "f6e5782d-a019-4394-b5a0-e5c29a328688",
+    "nome": "Renato",
+    "emailCorporativo": "iuewfiwef@iudsfgbiuewf.com",
+    "cargoId": "cargo-1769007250938",
+    "setorId": "setor-operacional",
+    "usuarioId": "1895aa9a-de9e-4266-92e2-5d9139bcd08a",
+    "ativo": true,
+    "createdAt": "2026-01-21T14:59:16.208Z"
+  }
+]

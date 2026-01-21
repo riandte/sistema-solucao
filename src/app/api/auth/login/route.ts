@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { SignJWT } from 'jose'
 import { RoleName } from '@/lib/types'
 import { MockUserStore } from '@/lib/auth/mockUsers'
+import { MockFuncionarioStore } from '@/lib/org/funcionarios'
+import { MockCargoStore } from '@/lib/org/cargos'
 
 // Mock authentication function - Replace this with actual AD/LDAP logic
 async function authenticateUser(username: string, pass: string) {
@@ -25,11 +27,28 @@ async function authenticateUser(username: string, pass: string) {
     return 'INACTIVE';
   }
 
+  // Buscar dados do funcionário vinculado
+  const funcionario = await MockFuncionarioStore.getByUserId(user.id);
+  let funcionarioData = undefined;
+
+  if (funcionario && funcionario.ativo) {
+    const cargo = await MockCargoStore.getById(funcionario.cargoId);
+    if (cargo) {
+        funcionarioData = {
+            id: funcionario.id,
+            setorId: funcionario.setorId,
+            cargoId: funcionario.cargoId,
+            escopo: cargo.escopo
+        };
+    }
+  }
+
   return { 
     id: user.id,
     name: user.name, 
     email: user.email, 
-    roles: user.roles 
+    roles: user.roles,
+    funcionario: funcionarioData
   }
 }
 

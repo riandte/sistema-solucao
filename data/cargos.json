@@ -1,0 +1,67 @@
+[
+  {
+    "id": "cargo-gerente-ti",
+    "nome": "Gerente de TI",
+    "descricao": "Gestão da área de tecnologia",
+    "setoresPermitidos": [
+      "setor-ti"
+    ],
+    "escopo": "SETORIAL",
+    "ativo": true,
+    "createdAt": "2026-01-21T12:38:49.933Z",
+    "updatedAt": "2026-01-21T13:32:37.234Z"
+  },
+  {
+    "id": "cargo-analista-suporte",
+    "nome": "Analista de Suporte",
+    "descricao": "Atendimento N1/N2",
+    "setoresPermitidos": [
+      "setor-ti"
+    ],
+    "escopo": "INDIVIDUAL",
+    "ativo": true,
+    "createdAt": "2026-01-21T12:38:49.933Z"
+  },
+  {
+    "id": "cargo-analista-financeiro",
+    "nome": "Analista",
+    "descricao": "Rotinas financeiras",
+    "setoresPermitidos": [
+      "setor-financeiro",
+      "setor-ti",
+      "setor-operacional",
+      "setor-1769000452695",
+      "setor-comercial"
+    ],
+    "escopo": "INDIVIDUAL",
+    "ativo": true,
+    "createdAt": "2026-01-21T12:38:49.933Z",
+    "updatedAt": "2026-01-21T13:32:59.046Z"
+  },
+  {
+    "id": "cargo-gerente-geral",
+    "nome": "Gerente Geral",
+    "descricao": "Visão global",
+    "setoresPermitidos": [
+      "setor-ti",
+      "setor-financeiro",
+      "setor-operacional",
+      "setor-comercial",
+      "setor-1769000452695"
+    ],
+    "escopo": "SETORIAL",
+    "ativo": true,
+    "createdAt": "2026-01-21T12:38:49.933Z",
+    "updatedAt": "2026-01-21T13:32:29.527Z"
+  },
+  {
+    "ativo": true,
+    "escopo": "INDIVIDUAL",
+    "setoresPermitidos": [
+      "setor-operacional"
+    ],
+    "nome": "Montador",
+    "id": "cargo-1769007250938",
+    "createdAt": "2026-01-21T14:54:10.938Z"
+  }
+]

@@ -1,0 +1,36 @@
+[
+  {
+    "id": "setor-ti",
+    "nome": "Tecnologia da Informação",
+    "descricao": "Suporte, Infraestrutura e Desenvolvimento",
+    "ativo": true,
+    "createdAt": "2026-01-21T12:44:58.757Z"
+  },
+  {
+    "id": "setor-financeiro",
+    "nome": "Financeiro",
+    "descricao": "Contas a Pagar/Receber e Tesouraria",
+    "ativo": true,
+    "createdAt": "2026-01-21T12:44:58.757Z"
+  },
+  {
+    "id": "setor-operacional",
+    "nome": "Operacional",
+    "descricao": "Logística e Execução de Serviços",
+    "ativo": true,
+    "createdAt": "2026-01-21T12:44:58.757Z"
+  },
+  {
+    "id": "setor-comercial",
+    "nome": "Comercial",
+    "descricao": "Vendas e Relacionamento",
+    "ativo": true,
+    "createdAt": "2026-01-21T12:44:58.757Z"
+  },
+  {
+    "ativo": true,
+    "nome": "Administrativo",
+    "id": "setor-1769000452695",
+    "createdAt": "2026-01-21T13:00:52.695Z"
+  }
+]

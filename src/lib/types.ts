@@ -1,4 +1,16 @@
 
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  roles: RoleName[];
+  active?: boolean;
+  // Vínculos organizacionais (opcionais na interface base, mas usados no sistema)
+  setorId?: string;
+  cargoId?: string;
+  funcionario?: Funcionario; // Dados expandidos
+}
+
 // ==============================================================================
 // ENUMS E TIPOS LITERAIS
 // ==============================================================================
@@ -34,7 +46,7 @@ export type PrioridadePendencia = 'BAIXA' | 'MEDIA' | 'ALTA';
 /**
  * Setores disponíveis para atribuição
  */
-export type SetorResponsavel = 'TI' | 'FINANCEIRO' | 'COMERCIAL' | 'RH' | 'OPERACIONAL';
+export type SetorResponsavel = string; // Agora usa IDs dos setores (ex: 'setor-ti'), não enum fixo
 
 /**
  * Define a origem da Pendência.
@@ -96,6 +108,52 @@ export interface Role {
   permissions: Permission[];
   isSystem?: boolean; // Se true, não pode ser excluído
   userCount?: number; // Campo calculado para listagem
+}
+
+// ==============================================================================
+// ESTRUTURA ORGANIZACIONAL (SETOR, CARGO, FUNCIONÁRIO)
+// ==============================================================================
+
+/**
+ * Escopo de atuação do Cargo
+ * INDIVIDUAL: Vê apenas o que é atribuído a si
+ * SETORIAL: Vê tudo do seu setor
+ */
+export type EscopoAtuacao = 'INDIVIDUAL' | 'SETORIAL';
+
+export interface Setor {
+  id: string;
+  nome: string;
+  descricao?: string;
+  ativo: boolean;
+  // Metadata
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface Cargo {
+  id: string;
+  nome: string;
+  descricao?: string;
+  setoresPermitidos: string[]; // IDs dos setores onde este cargo pode atuar
+  escopo: EscopoAtuacao;
+  ativo: boolean;
+  // Metadata
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface Funcionario {
+  id: string;
+  nome: string;
+  emailCorporativo: string;
+  setorId: string;
+  cargoId: string;
+  usuarioId?: string; // Link com Usuário do Sistema (Login)
+  ativo: boolean;
+  // Metadata
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export type Permission = 

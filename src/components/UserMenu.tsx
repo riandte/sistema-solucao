@@ -4,12 +4,10 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { LogOut, User as UserIcon, Loader2, Settings } from 'lucide-react'
 import Link from 'next/link'
+import { UserSession } from '@/lib/auth/authContext'
 
 interface UserMenuProps {
-  user: {
-    name: string
-    email?: string
-  }
+  user: UserSession
 }
 
 export default function UserMenu({ user }: UserMenuProps) {

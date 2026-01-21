@@ -3,12 +3,10 @@
 import { useRouter, usePathname } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import UserMenu from './UserMenu'
+import { UserSession } from '@/lib/auth/authContext'
 
 interface TopHeaderProps {
-  user: {
-    name: string
-    email?: string
-  }
+  user: UserSession
 }
 
 function getPageTitle(pathname: string) {

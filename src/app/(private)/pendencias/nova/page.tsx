@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Save, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
@@ -10,6 +10,20 @@ export default function NovaPendenciaPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [funcionarios, setFuncionarios] = useState<{id: string, nome: string, usuarioId?: string, cargoNome: string, setorId?: string}[]>([])
+  const [setores, setSetores] = useState<{id: string, nome: string}[]>([])
+
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/funcionarios/list').then(res => res.json()),
+      fetch('/api/admin/setores').then(res => res.json())
+    ])
+      .then(([funcsData, setoresData]) => {
+        if (Array.isArray(funcsData)) setFuncionarios(funcsData)
+        if (Array.isArray(setoresData)) setSetores(setoresData)
+      })
+      .catch(err => console.error('Erro ao buscar dados:', err));
+  }, []);
 
   const [formData, setFormData] = useState({
     titulo: '',
@@ -160,31 +174,45 @@ export default function NovaPendenciaPage() {
                         <select
                             id="setor"
                             value={formData.setorResponsavel}
-                            onChange={e => setFormData({ ...formData, setorResponsavel: e.target.value as SetorResponsavel })}
+                            onChange={e => setFormData({ 
+                                ...formData, 
+                                setorResponsavel: e.target.value as SetorResponsavel,
+                                responsavelId: '' // Limpa o responsável ao mudar o setor
+                            })}
                             className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all appearance-none"
                         >
                             <option value="" className="bg-gray-800">Selecione um setor...</option>
-                            <option value="TI" className="bg-gray-800">TI</option>
-                            <option value="FINANCEIRO" className="bg-gray-800">Financeiro</option>
-                            <option value="COMERCIAL" className="bg-gray-800">Comercial</option>
-                            <option value="RH" className="bg-gray-800">RH</option>
-                            <option value="OPERACIONAL" className="bg-gray-800">Operacional</option>
+                            {setores.map(s => (
+                                <option key={s.id} value={s.id} className="bg-gray-800">
+                                    {s.nome}
+                                </option>
+                            ))}
                         </select>
                     </div>
 
                     {/* Responsável */}
                     <div className="space-y-2">
                         <label htmlFor="responsavel" className="block text-sm font-medium text-gray-300">
-                            ID do Responsável (Opcional)
+                            Responsável (Opcional)
                         </label>
-                        <input
-                            type="text"
+                        <select
                             id="responsavel"
                             value={formData.responsavelId}
                             onChange={e => setFormData({ ...formData, responsavelId: e.target.value })}
-                            className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-                            placeholder="Ex: user-123"
-                        />
+                            className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all appearance-none"
+                        >
+                            <option value="" className="bg-gray-800">Selecione um responsável...</option>
+                            {funcionarios
+                                .filter(f => !formData.setorResponsavel || f.setorId === formData.setorResponsavel)
+                                .map(f => (
+                                <option key={f.id} value={f.usuarioId || ''} className="bg-gray-800">
+                                    {f.nome} - {f.cargoNome}
+                                </option>
+                            ))}
+                        </select>
+                        <p className="text-xs text-gray-500">
+                            Se não selecionado, a pendência ficará no backlog do setor ou geral.
+                        </p>
                     </div>
                 </div>
             </div>

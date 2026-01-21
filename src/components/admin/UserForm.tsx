@@ -1,27 +1,34 @@
-import { useState } from 'react';
-import { User, Role } from '@/lib/types';
+import { useState, useEffect } from 'react';
+import { User, Role, Setor, Cargo } from '@/lib/types';
 
 interface UserFormProps {
-  initialData?: Partial<User>;
+  initialData?: Partial<User> & { setorId?: string; cargoId?: string };
   roles: Role[];
-  onSubmit: (data: Partial<User>) => Promise<void>;
+  setores: Setor[];
+  cargos: Cargo[];
+  onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
   isEditing?: boolean;
 }
 
-export default function UserForm({ initialData, roles, onSubmit, onCancel, isEditing = false }: UserFormProps) {
+export default function UserForm({ initialData, roles, setores, cargos, onSubmit, onCancel, isEditing = false }: UserFormProps) {
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
     email: initialData?.email || '',
-    // Login logic: for now login is same as email or separate? 
-    // Types.ts doesn't strictly have 'login', uses 'email' often or 'id'.
-    // Prompt says "Email / Login". I will use email as login.
     password: '',
-    role: initialData?.roles?.[0] || '', // Simple single role selection for MVP
-    active: initialData?.active ?? true
+    role: initialData?.roles?.[0] || '',
+    active: initialData?.active ?? true,
+    setorId: initialData?.setorId || '',
+    cargoId: initialData?.cargoId || ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Filtrar cargos pelo setor selecionado (se houver regra de negócio, por enquanto mostra todos ou filtra se cargo tiver setor vinculado)
+  // O Cargo tem "setoresPermitidos". Vamos filtrar.
+  const filteredCargos = formData.setorId 
+    ? cargos.filter(c => c.setoresPermitidos?.includes(formData.setorId))
+    : cargos;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,8 +36,8 @@ export default function UserForm({ initialData, roles, onSubmit, onCancel, isEdi
     setLoading(true);
 
     try {
-      if (!formData.name || !formData.email || !formData.role) {
-        throw new Error('Preencha os campos obrigatórios.');
+      if (!formData.name || !formData.email || !formData.role || !formData.setorId || !formData.cargoId) {
+        throw new Error('Preencha todos os campos obrigatórios (incluindo Setor e Cargo).');
       }
       if (!isEditing && !formData.password) {
         throw new Error('Senha é obrigatória para novos usuários.');
@@ -38,7 +45,7 @@ export default function UserForm({ initialData, roles, onSubmit, onCancel, isEdi
 
       await onSubmit({
         ...formData,
-        roles: [formData.role] // Wrap in array
+        roles: [formData.role]
       });
     } catch (err: any) {
       setError(err.message);
@@ -55,8 +62,8 @@ export default function UserForm({ initialData, roles, onSubmit, onCancel, isEdi
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4">
-        <div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-400 mb-1">Nome Completo</label>
           <input
             type="text"
@@ -67,7 +74,7 @@ export default function UserForm({ initialData, roles, onSubmit, onCancel, isEdi
           />
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-400 mb-1">Email / Login</label>
           <input
             type="email"
@@ -78,7 +85,7 @@ export default function UserForm({ initialData, roles, onSubmit, onCancel, isEdi
           />
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-400 mb-1">
             {isEditing ? 'Nova Senha (deixe em branco para manter)' : 'Senha'}
           </label>
@@ -91,7 +98,7 @@ export default function UserForm({ initialData, roles, onSubmit, onCancel, isEdi
           />
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-400 mb-1">Papel (Função)</label>
           <select
             value={formData.role}
@@ -105,7 +112,36 @@ export default function UserForm({ initialData, roles, onSubmit, onCancel, isEdi
           </select>
         </div>
 
-        <div className="flex items-center gap-3 pt-2">
+        <div>
+            <label className="block text-sm font-medium text-gray-400 mb-1">Setor</label>
+            <select
+                value={formData.setorId}
+                onChange={e => setFormData({ ...formData, setorId: e.target.value, cargoId: '' })} // Reset cargo on sector change
+                className="w-full bg-gray-900 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+                <option value="">Selecione...</option>
+                {setores.map(s => (
+                    <option key={s.id} value={s.id}>{s.nome}</option>
+                ))}
+            </select>
+        </div>
+
+        <div>
+            <label className="block text-sm font-medium text-gray-400 mb-1">Cargo</label>
+            <select
+                value={formData.cargoId}
+                onChange={e => setFormData({ ...formData, cargoId: e.target.value })}
+                className="w-full bg-gray-900 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={!formData.setorId}
+            >
+                <option value="">Selecione...</option>
+                {filteredCargos.map(c => (
+                    <option key={c.id} value={c.id}>{c.nome}</option>
+                ))}
+            </select>
+        </div>
+
+        <div className="md:col-span-2 flex items-center gap-3 pt-2">
           <input
             type="checkbox"
             id="active"

@@ -15,15 +15,17 @@ import {
   Settings,
   Users,
   Shield,
+  Briefcase,
+  Building2,
+  UserCheck,
   ChevronDown
 } from 'lucide-react'
+import { UserSession } from '@/lib/auth/authContext'
 
 interface SidebarProps {
   collapsed: boolean
   setCollapsed: (v: boolean) => void
-  user: {
-    roles: string[]
-  }
+  user: UserSession
 }
 
 export default function Sidebar({ collapsed, setCollapsed, user }: SidebarProps) {
@@ -40,6 +42,9 @@ export default function Sidebar({ collapsed, setCollapsed, user }: SidebarProps)
   const configLinks = [
     { href: '/configuracoes/usuarios', label: 'Usuários', icon: Users },
     { href: '/configuracoes/papeis', label: 'Papéis', icon: Shield },
+    { href: '/configuracoes/setores', label: 'Setores', icon: Building2 },
+    { href: '/configuracoes/cargos', label: 'Cargos', icon: Briefcase },
+    { href: '/configuracoes/funcionarios', label: 'Funcionários', icon: UserCheck },
   ]
 
   return (

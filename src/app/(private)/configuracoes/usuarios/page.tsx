@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { User, Role } from '@/lib/types';
+import { User, Role, Setor, Cargo, Funcionario } from '@/lib/types';
 import { Plus, Pencil, Trash2, Search, ShieldAlert, UserX, UserCheck } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
@@ -10,12 +10,17 @@ import UserForm from '@/components/admin/UserForm';
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [setores, setSetores] = useState<Setor[]>([]);
+  const [cargos, setCargos] = useState<Cargo[]>([]);
+  const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
+  
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   
   // Modal State
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | undefined>(undefined);
+  const [editingUserOrgData, setEditingUserOrgData] = useState<{setorId?: string, cargoId?: string}>({});
   
   // Confirm Dialog State
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -27,13 +32,20 @@ export default function UsersPage() {
 
   const fetchData = async () => {
     try {
-      const [usersRes, rolesRes] = await Promise.all([
-        fetch('/api/admin/users'),
-        fetch('/api/admin/roles')
+      const headers = { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' };
+      const [usersRes, rolesRes, setoresRes, cargosRes, funcRes] = await Promise.all([
+        fetch('/api/admin/users', { headers }),
+        fetch('/api/admin/roles', { headers }),
+        fetch('/api/admin/setores', { headers }),
+        fetch('/api/admin/cargos', { headers }),
+        fetch('/api/admin/funcionarios', { headers })
       ]);
       
       if (usersRes.ok) setUsers(await usersRes.json());
       if (rolesRes.ok) setRoles(await rolesRes.json());
+      if (setoresRes.ok) setSetores(await setoresRes.json());
+      if (cargosRes.ok) setCargos(await cargosRes.json());
+      if (funcRes.ok) setFuncionarios(await funcRes.json());
     } catch (error) {
       console.error('Failed to fetch data', error);
     } finally {
@@ -41,7 +53,27 @@ export default function UsersPage() {
     }
   };
 
-  const handleSave = async (data: Partial<User>) => {
+  const handleCreate = () => {
+    setEditingUser(undefined);
+    setEditingUserOrgData({});
+    setIsFormOpen(true);
+  };
+
+  const handleEdit = (user: User) => {
+    setEditingUser(user);
+    const func = funcionarios.find(f => f.usuarioId === user.id);
+    if (func) {
+        setEditingUserOrgData({
+            setorId: func.setorId,
+            cargoId: func.cargoId
+        });
+    } else {
+        setEditingUserOrgData({});
+    }
+    setIsFormOpen(true);
+  };
+
+  const handleSave = async (data: Partial<User> & { setorId?: string; cargoId?: string }) => {
     try {
       if (editingUser) {
         // Update
@@ -154,17 +186,23 @@ export default function UsersPage() {
                 <th className="p-4 text-sm font-medium text-gray-400">Usuário</th>
                 <th className="p-4 text-sm font-medium text-gray-400">Email / Login</th>
                 <th className="p-4 text-sm font-medium text-gray-400">Papel</th>
+                <th className="p-4 text-sm font-medium text-gray-400">Org.</th>
                 <th className="p-4 text-sm font-medium text-gray-400">Status</th>
                 <th className="p-4 text-sm font-medium text-gray-400 text-right">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {loading ? (
-                <tr><td colSpan={5} className="p-8 text-center text-gray-500">Carregando...</td></tr>
+                <tr><td colSpan={6} className="p-8 text-center text-gray-500">Carregando...</td></tr>
               ) : filteredUsers.length === 0 ? (
-                <tr><td colSpan={5} className="p-8 text-center text-gray-500">Nenhum usuário encontrado.</td></tr>
+                <tr><td colSpan={6} className="p-8 text-center text-gray-500">Nenhum usuário encontrado.</td></tr>
               ) : (
-                filteredUsers.map(user => (
+                filteredUsers.map(user => {
+                  const func = funcionarios.find(f => f.usuarioId === user.id);
+                  const setor = func ? setores.find(s => s.id === func.setorId) : null;
+                  const cargo = func ? cargos.find(c => c.id === func.cargoId) : null;
+
+                  return (
                   <tr key={user.id} className="hover:bg-white/5 transition-colors">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
@@ -179,6 +217,16 @@ export default function UsersPage() {
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
                         {user.roles.join(', ')}
                       </span>
+                    </td>
+                    <td className="p-4 text-sm text-gray-400">
+                        {func ? (
+                            <div className="flex flex-col">
+                                <span className="text-white">{cargo?.nome || 'Sem Cargo'}</span>
+                                <span className="text-xs">{setor?.nome || 'Sem Setor'}</span>
+                            </div>
+                        ) : (
+                            <span className="text-xs italic opacity-50">Não vinculado</span>
+                        )}
                     </td>
                     <td className="p-4">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border ${
@@ -214,7 +262,8 @@ export default function UsersPage() {
                       </div>
                     </td>
                   </tr>
-                ))
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -227,8 +276,10 @@ export default function UsersPage() {
         title={editingUser ? `Editar Usuário: ${editingUser.name}` : 'Novo Usuário'}
       >
         <UserForm
-          initialData={editingUser}
+          initialData={editingUser ? { ...editingUser, ...editingUserOrgData } : undefined}
           roles={roles}
+          setores={setores}
+          cargos={cargos}
           onSubmit={handleSave}
           onCancel={() => setIsFormOpen(false)}
           isEditing={!!editingUser}

@@ -155,10 +155,6 @@ export default function PendenciasPage() {
             throw new Error('Falha ao mover pendência')
         }
         
-        if (nextStatus === 'CONCLUIDO') {
-             await loadPendencias() 
-        }
-
     } catch (err) {
         console.error(err)
         setPendencias(originalPendencias)

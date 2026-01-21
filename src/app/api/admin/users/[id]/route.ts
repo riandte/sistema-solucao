@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { UserService } from '@/lib/services/userService';
 import { AuthContext } from '@/lib/auth/authContext';
+import { MockFuncionarioStore } from '@/lib/org/funcionarios';
+import { randomUUID } from 'crypto';
 
 async function getContext(req: NextRequest): Promise<AuthContext> {
     const { cookies } = await import('next/headers');
@@ -19,6 +21,30 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const context = await getContext(req);
     const data = await req.json();
     const user = await UserService.atualizar(id, data, context);
+    
+    // Update/Create Funcionario if cargo/setor provided
+    if (data.cargoId && data.setorId) {
+        const func = await MockFuncionarioStore.getByUserId(id);
+        if (func) {
+            func.cargoId = data.cargoId;
+            func.setorId = data.setorId;
+            func.nome = user.name; // Keep name synced
+            func.emailCorporativo = user.email; // Keep email synced
+            await MockFuncionarioStore.save(func);
+        } else {
+             await MockFuncionarioStore.save({
+                id: randomUUID(),
+                nome: user.name,
+                emailCorporativo: user.email,
+                cargoId: data.cargoId,
+                setorId: data.setorId,
+                usuarioId: user.id,
+                ativo: true,
+                createdAt: new Date().toISOString()
+            });
+        }
+    }
+
     return NextResponse.json(user);
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 403 });

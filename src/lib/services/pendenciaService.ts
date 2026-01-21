@@ -4,6 +4,7 @@ import { randomUUID } from 'crypto';
 import { Pendencia } from '../types';
 import { AuthContext } from '../auth/authContext';
 import { assertPermission, hasPermission, ForbiddenError } from '../auth/permissions';
+import { MockSetorStore } from '@/lib/org/setores';
 
 const DATA_FILE = path.join(process.cwd(), 'data', 'pendencias.json');
 
@@ -55,17 +56,29 @@ export const PendenciaService = {
 
     // 1. Admin/Operador/Sistema veem tudo
     // Se NÃO tiver permissão global, filtra por propriedade
-    if (!hasPermission(context, 'PENDENCIA:LER_TODAS')) {
+    if (!(await hasPermission(context, 'PENDENCIA:LER_TODAS'))) {
        // 2. Usuário comum vê apenas o que criou ou é responsável
        if (context.user) {
-         pendencias = pendencias.filter(p => 
-           p.criadoPor === context.user.id || 
-           p.responsavelId === context.user.id ||
-           (p.setorResponsavel && context.user.roles.includes(p.setorResponsavel as any)) // Assume roles map to sectors roughly or explicit check
-           // Simplificação: Usuário vê se for criador ou responsável direto.
-           // Se quiser ver por setor, precisaria saber o setor do usuário.
-           // Por enquanto, mantemos regra simples: ID direto ou Criador.
-         );
+         // REGRA: Usuário deve estar vinculado a Cargo e Setor para visualizar demandas
+         if (!context.user.funcionario) {
+             return [];
+         }
+
+         pendencias = pendencias.filter(p => {
+           // A. Criador ou Responsável Direto sempre vê
+           if (p.criadoPor === context.user.id || p.responsavelId === context.user.id) return true;
+           
+           // B. Regras de Escopo (Setorial)
+           if (context.user.funcionario) {
+               const { setorId, escopo } = context.user.funcionario;
+               // Se tem escopo SETORIAL, vê itens atribuídos ao seu setor
+               if (escopo === 'SETORIAL' && p.setorResponsavel === setorId) {
+                   return true;
+               }
+           }
+           
+           return false;
+         });
        } else {
          return [];
        }
@@ -118,6 +131,17 @@ export const PendenciaService = {
   async criar(dados: Omit<Pendencia, 'id' | 'dataCriacao'>, context: AuthContext): Promise<Pendencia> {
     try {
       await assertPermission(context, 'PENDENCIA:CRIAR');
+      
+      // Validação de Competência para Criação (Opcional, mas boa prática)
+      // Se não for Admin, verifica se está tentando atribuir fora da competência? 
+      // O prompt diz: "Backend valida se: Pessoa pertence ao setor, Setor está ativo" na atribuição.
+      
+      if (dados.setorResponsavel) {
+          const setor = await MockSetorStore.getById(dados.setorResponsavel);
+          if (!setor || !setor.ativo) {
+              throw new Error('Setor responsável inválido ou inativo.');
+          }
+      }
 
       // 1. Regra de Atribuição Automática para OS
       if (dados.origemTipo === 'OS') {
@@ -279,8 +303,18 @@ export const PendenciaService = {
     }
     
     // Visibilidade ABAC (Dono ou Responsável)
-    if (context.user && (p.criadoPor === context.user.id || p.responsavelId === context.user.id)) {
-      return p;
+    if (context.user) {
+        if (p.criadoPor === context.user.id || p.responsavelId === context.user.id) {
+            return p;
+        }
+
+        // Visibilidade Setorial
+        if (context.user.funcionario) {
+            const { setorId, escopo } = context.user.funcionario;
+            if (escopo === 'SETORIAL' && p.setorResponsavel === setorId) {
+                return p;
+            }
+        }
     }
 
     throw new ForbiddenError('Você não tem permissão para visualizar esta pendência.');

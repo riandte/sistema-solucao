@@ -14,22 +14,38 @@ interface SimpleUser {
     name: string;
 }
 
+interface Setor {
+    id: string;
+    nome: string;
+}
+
+interface Funcionario {
+    id: string;
+    nome: string;
+    usuarioId?: string;
+    cargoNome: string;
+}
+
 export function PendenciasFilter({ filters, onChange }: PendenciasFilterProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [localFilters, setLocalFilters] = useState<PendenciaFilters>(filters)
-  const [users, setUsers] = useState<SimpleUser[]>([])
-  const [loadingUsers, setLoadingUsers] = useState(false)
+  const [funcionarios, setFuncionarios] = useState<Funcionario[]>([])
+  const [setores, setSetores] = useState<Setor[]>([])
+  const [loadingData, setLoadingData] = useState(false)
 
   useEffect(() => {
-      if (isOpen && users.length === 0) {
-          setLoadingUsers(true)
-          fetch('/api/users/simple')
-            .then(res => res.json())
-            .then(data => {
-                if (Array.isArray(data)) setUsers(data)
+      if (isOpen && funcionarios.length === 0) {
+          setLoadingData(true)
+          Promise.all([
+            fetch('/api/funcionarios/list').then(res => res.json()),
+            fetch('/api/admin/setores').then(res => res.json())
+          ])
+            .then(([funcsData, setoresData]) => {
+                if (Array.isArray(funcsData)) setFuncionarios(funcsData)
+                if (Array.isArray(setoresData)) setSetores(setoresData)
             })
-            .catch(err => console.error('Failed to load users', err))
-            .finally(() => setLoadingUsers(false))
+            .catch(err => console.error('Failed to load filter data', err))
+            .finally(() => setLoadingData(false))
       }
   }, [isOpen])
 
@@ -117,11 +133,9 @@ export function PendenciasFilter({ filters, onChange }: PendenciasFilterProps) {
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-200 focus:border-blue-500 outline-none"
                     >
                         <option value="">Todos</option>
-                        <option value="TI">TI</option>
-                        <option value="FINANCEIRO">Financeiro</option>
-                        <option value="COMERCIAL">Comercial</option>
-                        <option value="RH">RH</option>
-                        <option value="OPERACIONAL">Operacional</option>
+                        {setores.map(s => (
+                            <option key={s.id} value={s.id}>{s.nome}</option>
+                        ))}
                     </select>
                 </div>
 
@@ -132,14 +146,14 @@ export function PendenciasFilter({ filters, onChange }: PendenciasFilterProps) {
                         value={localFilters.responsavelId || ''}
                         onChange={e => setLocalFilters({...localFilters, responsavelId: e.target.value || undefined})}
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-200 focus:border-blue-500 outline-none"
-                        disabled={loadingUsers}
+                        disabled={loadingData}
                     >
                         <option value="">Todos</option>
-                        {users.map(u => (
-                            <option key={u.id} value={u.id}>{u.name}</option>
+                        {funcionarios.map(f => (
+                            <option key={f.id} value={f.usuarioId || ''}>{f.nome} - {f.cargoNome}</option>
                         ))}
                     </select>
-                    {loadingUsers && <span className="text-xs text-gray-500 flex items-center gap-1 mt-1"><Loader2 size={10} className="animate-spin"/> Carregando usuários...</span>}
+                    {loadingData && <span className="text-xs text-gray-500 flex items-center gap-1 mt-1"><Loader2 size={10} className="animate-spin"/> Carregando dados...</span>}
                 </div>
 
                 {/* Criado Por */}
@@ -149,11 +163,11 @@ export function PendenciasFilter({ filters, onChange }: PendenciasFilterProps) {
                         value={localFilters.criadoPor || ''}
                         onChange={e => setLocalFilters({...localFilters, criadoPor: e.target.value || undefined})}
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-200 focus:border-blue-500 outline-none"
-                        disabled={loadingUsers}
+                        disabled={loadingData}
                     >
                         <option value="">Todos</option>
-                        {users.map(u => (
-                            <option key={u.id} value={u.id}>{u.name}</option>
+                        {funcionarios.map(f => (
+                            <option key={f.id} value={f.usuarioId || ''}>{f.nome}</option>
                         ))}
                     </select>
                 </div>
