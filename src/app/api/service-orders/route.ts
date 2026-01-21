@@ -29,6 +29,18 @@ function getSystemSession(req: Request): AuthContext | null {
   return null;
 }
 
+export async function GET(req: Request) {
+  let session = await getSession(req);
+  if (!session) {
+    session = getSystemSession(req);
+  }
+
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  return NextResponse.json(store);
+}
+
 export async function POST(req: Request) {
   // 1. Resolve Autenticação (Usuário ou Sistema)
   let session = await getSession(req);

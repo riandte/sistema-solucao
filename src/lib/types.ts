@@ -23,12 +23,18 @@ export type StatusPendencia =
   | 'PENDENTE'      // Criada, aguardando início (Backlog/To Do)
   | 'EM_ANDAMENTO'  // Sendo executada (Doing)
   | 'CONCLUIDO'     // Finalizada com sucesso (Done)
-  | 'CANCELADO';    // Finalizada sem execução
+  | 'CANCELADO'     // Finalizada sem execução (LEGADO, manter por compatibilidade)
+  | 'ENCERRADA_SEM_CONCLUSAO'; // Encerrada sem sucesso (Substitui Cancelado no fluxo manual)
 
 /**
  * Nível de urgência da tarefa.
  */
 export type PrioridadePendencia = 'BAIXA' | 'MEDIA' | 'ALTA';
+
+/**
+ * Setores disponíveis para atribuição
+ */
+export type SetorResponsavel = 'TI' | 'FINANCEIRO' | 'COMERCIAL' | 'RH' | 'OPERACIONAL';
 
 /**
  * Define a origem da Pendência.
@@ -64,6 +70,11 @@ export interface Pendencia {
   // Responsabilidades (Auditoria de Atores)
   criadoPor: string; // ID do usuário que criou (Sistema ou Humano)
   responsavelId?: string; // ID do usuário atribuído para execução (Opcional no início)
+  setorResponsavel?: SetorResponsavel; // Atribuição por setor (Novo)
+
+  // Encerramento
+  conclusao?: string; // Texto obrigatório para encerramento manual
+  tipoEncerramento?: 'CONCLUIDO' | 'SEM_CONCLUSAO'; // Persistência explícita do motivo
 
   // Auditoria Temporal (Datas Relevantes)
   dataCriacao: string; // ISO 8601 (Imutável após criação)

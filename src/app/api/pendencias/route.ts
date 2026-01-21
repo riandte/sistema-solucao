@@ -9,8 +9,19 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const { searchParams } = new URL(req.url);
+  const filters = {
+    status: searchParams.get('status') || undefined,
+    tipo: searchParams.get('tipo') || undefined,
+    responsavelId: searchParams.get('responsavelId') || undefined,
+    criadoPor: searchParams.get('criadoPor') || undefined,
+    dataInicio: searchParams.get('dataInicio') || undefined,
+    dataFim: searchParams.get('dataFim') || undefined,
+    termo: searchParams.get('termo') || undefined,
+  };
+
   try {
-    const pendencias = await PendenciaService.listar(session);
+    const pendencias = await PendenciaService.listar(session, filters);
     return NextResponse.json(pendencias);
   } catch (error: any) {
     if (error instanceof ForbiddenError) {
@@ -40,6 +51,8 @@ export async function POST(req: Request) {
       tipo: body.tipo || 'OUTRO',
       status: body.status || 'PENDENTE',
       prioridade: body.prioridade || 'MEDIA',
+      responsavelId: body.responsavelId,
+      setorResponsavel: body.setorResponsavel,
       criadoPor: session.user.id, // Service irá garantir/sobrescrever isso
       origemTipo: 'MANUAL',
       dataPrevisao: body.dataPrevisao,

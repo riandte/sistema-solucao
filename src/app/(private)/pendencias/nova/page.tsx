@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Save, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
-import { TipoPendencia, PrioridadePendencia } from '@/lib/types'
+import { TipoPendencia, PrioridadePendencia, SetorResponsavel } from '@/lib/types'
 
 export default function NovaPendenciaPage() {
   const router = useRouter()
@@ -16,7 +16,9 @@ export default function NovaPendenciaPage() {
     descricao: '',
     tipo: 'OUTRO' as TipoPendencia,
     prioridade: 'MEDIA' as PrioridadePendencia,
-    dataPrevisao: ''
+    dataPrevisao: '',
+    setorResponsavel: '' as SetorResponsavel | '',
+    responsavelId: ''
   })
 
   async function handleSubmit(e: React.FormEvent) {
@@ -24,11 +26,27 @@ export default function NovaPendenciaPage() {
     setLoading(true)
     setError('')
 
+    // Validação de Atribuição
+    if (!formData.setorResponsavel && !formData.responsavelId) {
+        setError('É obrigatório atribuir a pendência a um Setor ou a uma Pessoa.')
+        setLoading(false)
+        window.scrollTo(0, 0)
+        return
+    }
+
     try {
+      // Limpa campos vazios para não enviar string vazia
+      const payload = {
+        ...formData,
+        setorResponsavel: formData.setorResponsavel || undefined,
+        responsavelId: formData.responsavelId || undefined,
+        origemTipo: 'MANUAL' // Força origem manual
+      }
+
       const res = await fetch('/api/pendencias', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       })
 
       if (!res.ok) {
@@ -40,6 +58,7 @@ export default function NovaPendenciaPage() {
       router.refresh()
     } catch (err: any) {
       setError(err.message)
+      window.scrollTo(0, 0)
     } finally {
       setLoading(false)
     }
@@ -125,6 +144,50 @@ export default function NovaPendenciaPage() {
               </select>
             </div>
           </div>
+
+          {/* Atribuição */}
+          <div className="bg-white/5 p-4 rounded-lg border border-white/5 space-y-4">
+                <h3 className="text-sm font-semibold text-gray-300 border-b border-white/10 pb-2 mb-4 flex items-center gap-2">
+                    <AlertCircle size={16} className="text-blue-400" />
+                    Atribuição <span className="text-xs font-normal text-gray-500 ml-auto">(Selecione ao menos um)</span>
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Setor */}
+                    <div className="space-y-2">
+                        <label htmlFor="setor" className="block text-sm font-medium text-gray-300">
+                            Setor Responsável
+                        </label>
+                        <select
+                            id="setor"
+                            value={formData.setorResponsavel}
+                            onChange={e => setFormData({ ...formData, setorResponsavel: e.target.value as SetorResponsavel })}
+                            className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all appearance-none"
+                        >
+                            <option value="" className="bg-gray-800">Selecione um setor...</option>
+                            <option value="TI" className="bg-gray-800">TI</option>
+                            <option value="FINANCEIRO" className="bg-gray-800">Financeiro</option>
+                            <option value="COMERCIAL" className="bg-gray-800">Comercial</option>
+                            <option value="RH" className="bg-gray-800">RH</option>
+                            <option value="OPERACIONAL" className="bg-gray-800">Operacional</option>
+                        </select>
+                    </div>
+
+                    {/* Responsável */}
+                    <div className="space-y-2">
+                        <label htmlFor="responsavel" className="block text-sm font-medium text-gray-300">
+                            ID do Responsável (Opcional)
+                        </label>
+                        <input
+                            type="text"
+                            id="responsavel"
+                            value={formData.responsavelId}
+                            onChange={e => setFormData({ ...formData, responsavelId: e.target.value })}
+                            className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                            placeholder="Ex: user-123"
+                        />
+                    </div>
+                </div>
+            </div>
 
           {/* Data Previsão */}
           <div className="space-y-2">
