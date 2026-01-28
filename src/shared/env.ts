@@ -61,7 +61,9 @@ export const env = new Proxy({} as z.infer<typeof envSchema>, {
 
     // Salva no cache e retorna
     const validatedValue = result.data;
-    _cache[key] = validatedValue;
+    // O TypeScript não consegue inferir que o tipo de validatedValue corresponde exatamente ao tipo esperado por _cache[key]
+    // devido ao acesso dinâmico, mas o Zod garante isso através do fieldSchema correspondente.
+    _cache[key] = validatedValue as any;
     return validatedValue;
   }
 });
