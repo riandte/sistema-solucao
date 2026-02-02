@@ -23,9 +23,9 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
 
   // 1. Allow public access to the home page '/'
-  if (path === '/') {
-    return NextResponse.next()
-  }
+  // if (path === '/') {
+  //   return NextResponse.next()
+  // }
 
   // 2. Check for auth cookie
   const token = request.cookies.get('auth_token')?.value
