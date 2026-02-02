@@ -24,6 +24,44 @@ async function main() {
   const safeUrl = url.replace(/:([^:@]+)@/, ':****@');
   console.log(`📡 URL de Conexão (.env): ${safeUrl}`);
 
+  // Extrair host da URL para teste de DNS
+  let host = '';
+  try {
+    // Tenta fazer parse da URL. Se falhar (ex: string incompleta), tenta extrair via regex
+    try {
+        const urlObj = new URL(url);
+        host = urlObj.hostname;
+    } catch {
+        const match = url.match(/@([^:/]+)/);
+        if (match) host = match[1];
+    }
+    
+    if (host) {
+        console.log(`🔍 Verificando resolução DNS para: ${host}`);
+        const dns = require('dns');
+        const util = require('util');
+        const lookup = util.promisify(dns.lookup);
+        
+        try {
+            const { address, family } = await lookup(host);
+            console.log(`   ✅ DNS Resolvido: ${address} (IPv${family})`);
+            
+            if (family === 6) {
+                console.warn("   ⚠️ AVISO: O host resolveu para IPv6. Se sua rede não suportar IPv6, a conexão falhará.");
+                console.warn("   Dica: No Supabase, use a URL do 'Connection Pooler' (porta 6543) para suporte IPv4.");
+            }
+        } catch (dnsErr: any) {
+            console.error(`   ❌ ERRO DE DNS: Não foi possível resolver o host '${host}'`);
+            console.error(`   Detalhe: ${dnsErr.code} - ${dnsErr.message}`);
+            if (dnsErr.code === 'ENOTFOUND') {
+                 console.error("   Causa provável: O host não existe ou há um problema de conectividade.");
+            }
+        }
+    }
+  } catch (e) {
+    console.log("   (Pulo verificação de DNS devido a erro no parse da URL)");
+  }
+
   try {
     // 2. Testar Conexão Real
     console.log("⏳ Testando conexão...");
