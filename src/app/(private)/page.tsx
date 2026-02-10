@@ -6,6 +6,8 @@ import { QuickActions } from '@/frontend/components/dashboard/QuickActions'
 import { prisma } from '@/backend/db'
 import { startOfMonth, subMonths, startOfDay } from 'date-fns'
 
+import { checkApiStatus } from '@/backend/locapp/client'
+
 // Force dynamic rendering to ensure real-time data
 export const dynamic = 'force-dynamic'
 
@@ -27,7 +29,8 @@ async function getDashboardData() {
     createdTodayCount,
     activeUsersCount,
     usersCreatedMonthCount,
-    recentActivities
+    recentActivities,
+    apiStatus // Adicionado
   ] = await Promise.all([
     prisma.pendency.count({ where: { status: 'PENDENTE' } }),
     prisma.pendency.count({ where: { status: 'EM_ANDAMENTO' } }),
@@ -67,7 +70,10 @@ async function getDashboardData() {
         timestamp: true,
         actorId: true
       }
-    })
+    }),
+
+    // 3. Check LocApp API Status
+    checkApiStatus()
   ]);
 
   const endTime = performance.now();
@@ -152,7 +158,10 @@ async function getDashboardData() {
     activities,
     system: {
       dbLatency,
-      dbStatus: 'connected' as const
+      dbStatus: 'connected' as const,
+      locAppStatus: apiStatus.status,
+      locAppLatency: apiStatus.latency,
+      locAppMessage: apiStatus.message
     }
   };
 }
@@ -198,9 +207,6 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* Quick Actions */}
-      <QuickActions />
-
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Activity Feed - Takes up 2 columns on large screens */}
@@ -213,9 +219,11 @@ export default async function DashboardPage() {
           <SystemStatus 
             dbLatency={data.system.dbLatency}
             dbStatus={data.system.dbStatus}
+            locAppStatus={data.system.locAppStatus}
+            locAppLatency={data.system.locAppLatency}
+            locAppMessage={data.system.locAppMessage}
           />
-          
-          {/* Optional: Add another widget here like "Pending Approvals" or "My Tasks" */}
+          <QuickActions />
         </div>
       </div>
     </div>

@@ -161,3 +161,40 @@ export async function inserirOuAtualizarPessoa(pessoas: Pessoa[]) {
   const resp = await axios.post<InserirPessoaResponse>(url, pessoas, { headers: { ...headers(), 'Content-Type': 'application/json' }, timeout: 15000 })
   return resp.data
 }
+
+export async function checkApiStatus() {
+  const { base } = cfg()
+  const start = performance.now()
+  
+  if (!base) {
+    return { status: 'error' as const, message: 'URL não configurada', latency: 0 }
+  }
+
+  try {
+    // Tenta um endpoint leve ou uma busca que sabemos que falhará rápido mas testará a conexão
+    // Usando um nome impossível para garantir retorno vazio rápido se conectar
+    const url = `${base.replace(/\/$/, '')}/api/Pessoa/Get?nome=HealthCheckPing`
+    await axios.get(url, { headers: headers(), timeout: 5000 })
+    
+    // Se passar (200 OK), está ótimo
+    return { status: 'connected' as const, message: 'Online', latency: Math.round(performance.now() - start) }
+  } catch (err: any) {
+    const latency = Math.round(performance.now() - start)
+    
+    if (err.response) {
+      // 403/401 significa que CONECTOU no servidor, mas a chave é inválida.
+      // Para fins de status de REDE, isso é "conectado" (o servidor está lá), 
+      // mas operacionalmente é um erro.
+      // O usuário pediu para ver a "comunicação", então vou distinguir.
+      if (err.response.status === 401 || err.response.status === 403) {
+         return { status: 'auth_error' as const, message: 'Autenticação Inválida', latency }
+      }
+      // Outros erros de servidor (500)
+      return { status: 'error' as const, message: `Erro ${err.response.status}`, latency }
+    } else if (err.code === 'ECONNABORTED') {
+       return { status: 'timeout' as const, message: 'Tempo Esgotado', latency }
+    }
+    
+    return { status: 'error' as const, message: 'Sem Conexão', latency }
+  }
+}

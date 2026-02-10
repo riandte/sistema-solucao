@@ -1,6 +1,6 @@
 export const metadata = {
-  title: 'ARARA',
-  description: 'ARARA - Gestão de Chamados Internos',
+  title: 'Arara',
+  description: 'Arara - Gestão de Chamados Internos',
 }
 
 import './globals.css'
