@@ -2,6 +2,7 @@
 "use client"
 
 import { Pendencia } from '@/shared/types'
+import { Formatters } from '@/shared/formatters'
 import { X, Calendar, User, Tag, FileText, Hash, Users, CheckCircle, AlertTriangle } from 'lucide-react'
 
 interface ModalPendenciaDetalheProps {
@@ -42,7 +43,7 @@ export function ModalPendenciaDetalhe({ pendencia, onClose }: ModalPendenciaDeta
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="bg-gray-800/50 p-3 rounded-lg border border-white/5">
                     <span className="text-xs text-gray-500 block mb-1">Status</span>
-                    <span className="text-sm font-medium text-white">{pendencia.status.replace('_', ' ')}</span>
+                    <span className="text-sm font-medium text-white">{Formatters.status(pendencia.status)}</span>
                 </div>
                 <div className="bg-gray-800/50 p-3 rounded-lg border border-white/5">
                     <span className="text-xs text-gray-500 block mb-1">Prioridade</span>
@@ -50,18 +51,20 @@ export function ModalPendenciaDetalhe({ pendencia, onClose }: ModalPendenciaDeta
                         pendencia.prioridade === 'ALTA' ? 'text-red-400' :
                         pendencia.prioridade === 'MEDIA' ? 'text-blue-400' : 'text-gray-400'
                     }`}>
-                        {pendencia.prioridade}
+                        {Formatters.priority(pendencia.prioridade)}
                     </span>
                 </div>
                 <div className="bg-gray-800/50 p-3 rounded-lg border border-white/5">
                     <span className="text-xs text-gray-500 block mb-1">Tipo</span>
-                    <span className="text-sm text-white">{pendencia.tipo}</span>
+                    <span className="text-sm text-white">{Formatters.pendencyType(pendencia.tipo)}</span>
                 </div>
                 <div className="bg-gray-800/50 p-3 rounded-lg border border-white/5">
                     <span className="text-xs text-gray-500 block mb-1">Origem</span>
                     <span className="text-sm text-white flex items-center gap-1">
-                        {pendencia.origemTipo}
-                        {pendencia.origemId && <span className="text-xs bg-gray-700 px-1 rounded">{pendencia.origemId}</span>}
+                        {Formatters.origin(pendencia.origemTipo, pendencia.origemId)}
+                        {/* Se tiver ID mas for OS, o Formatters.origin já retorna texto amigável. 
+                            Se quisermos mostrar o número, precisaríamos ter o objeto OS populado.
+                            Por enquanto, removemos a exibição do ID cru. */}
                     </span>
                 </div>
             </div>
@@ -108,18 +111,18 @@ export function ModalPendenciaDetalhe({ pendencia, onClose }: ModalPendenciaDeta
                     <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Datas</h4>
                     <div className="flex items-center gap-3 text-sm text-gray-300">
                         <Calendar size={14} className="text-gray-500" />
-                        <span>Criado em: {new Date(pendencia.dataCriacao).toLocaleString('pt-BR')}</span>
+                        <span>Criado em: {Formatters.date(pendencia.dataCriacao)}</span>
                     </div>
                     {pendencia.dataPrevisao && (
                          <div className="flex items-center gap-3 text-sm text-orange-300">
                             <Calendar size={14} className="text-orange-500" />
-                            <span>Previsão: {new Date(pendencia.dataPrevisao).toLocaleDateString('pt-BR')}</span>
+                            <span>Previsão: {Formatters.shortDate(pendencia.dataPrevisao)}</span>
                         </div>
                     )}
                     {pendencia.dataConclusao && (
                          <div className="flex items-center gap-3 text-sm text-green-300">
                             <Calendar size={14} className="text-green-500" />
-                            <span>Concluído: {new Date(pendencia.dataConclusao).toLocaleString('pt-BR')}</span>
+                            <span>Concluído: {Formatters.date(pendencia.dataConclusao)}</span>
                         </div>
                     )}
                 </div>
@@ -128,13 +131,13 @@ export function ModalPendenciaDetalhe({ pendencia, onClose }: ModalPendenciaDeta
                     <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Responsáveis</h4>
                     <div className="flex items-center gap-3 text-sm text-gray-300">
                         <User size={14} className="text-gray-500" />
-                        <span>Criado por: <span className="text-white">{pendencia.criadoPor}</span></span>
+                        <span>Criado por: <span className="text-white">{pendencia.criador?.name || 'Usuário desconhecido'}</span></span>
                     </div>
                      <div className="flex items-center gap-3 text-sm text-gray-300">
                         <User size={14} className="text-gray-500" />
-                        <span>Responsável: <span className="text-white">{pendencia.responsavelId || 'Não atribuído'}</span></span>
+                        <span>Responsável: <span className="text-white">{pendencia.responsavel?.name || pendencia.setorResponsavel || 'Não atribuído'}</span></span>
                     </div>
-                    {pendencia.setorResponsavel && (
+                    {pendencia.setorResponsavel && !pendencia.responsavel && (
                         <div className="flex items-center gap-3 text-sm text-gray-300">
                             <Users size={14} className="text-gray-500" />
                             <span>Setor: <span className="text-white">{pendencia.setorResponsavel}</span></span>

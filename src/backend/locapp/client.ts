@@ -1,6 +1,5 @@
 import axios from 'axios'
 import type { PessoaResponse, Pessoa, InserirPessoaResponse } from './types'
-import clientesPostman from './clientes_postman.json'
 
 import { env } from '@/shared/env'
 import { supabase } from '@/lib/supabase'
@@ -38,7 +37,24 @@ function mapSupabaseToPessoa(row: any): Pessoa {
 }
 
 export async function consultarCliente(cpfcnpj: string) {
-  // 1. Tentar buscar do Supabase (Prioridade)
+  const { base } = cfg()
+  
+  // 1. Se API configurada, tenta buscar nela (Prioridade Máxima para Dados Reais)
+  if (base) {
+    try {
+      const url = `${base.replace(/\/$/, '')}/api/Pessoa/Get?cpfcnpj=${encodeURIComponent(cpfcnpj)}`
+      const resp = await axios.get<PessoaResponse>(url, { headers: headers(), timeout: 10000 })
+      
+      if (resp.data?.Sucesso && resp.data?.Pessoa) {
+        return { sucesso: true, dados: resp.data.Pessoa as Pessoa }
+      }
+    } catch (err) {
+      console.warn(`Erro ao consultar API LocApp (${cpfcnpj}):`, err)
+      // Se falhar na API, continua para tentar Supabase/Mock como fallback
+    }
+  }
+
+  // 2. Tentar buscar do Supabase (Cache/Réplica)
   if (supabase) {
     try {
       // Remove caracteres não numéricos para garantir match
@@ -52,112 +68,80 @@ export async function consultarCliente(cpfcnpj: string) {
       if (data) {
         return { sucesso: true, dados: mapSupabaseToPessoa(data) }
       }
-      // Se não achar, continua para outras fontes (Legado/Mock)
     } catch (err) {
       console.warn('Erro ao consultar Supabase:', err)
     }
   }
 
-  const { base } = cfg()
-  if (!base) {
-     // Fallback para mock local se configurado ou dev
-     // ... (logica existente abaixo)
-  } else {
-    // Logica existente da API Legada
-    const url = `${base.replace(/\/$/, '')}/api/Pessoa/Get?cpfcnpj=${encodeURIComponent(cpfcnpj)}`
-    const resp = await axios.get<PessoaResponse>(url, { headers: headers(), timeout: 10000 })
-    const ok = !!resp.data?.Sucesso && !!resp.data?.Pessoa
-    return { sucesso: ok, dados: ok ? (resp.data.Pessoa as Pessoa) : undefined, mensagem: ok ? undefined : 'Cliente não encontrado' }
-  }
-  
-  throw new Error('LOCAPP_BASE_URL ausente e cliente não encontrado no Supabase')
+  // 3. Fallback para Mock removido para produção
+  // Se tinha base configurada mas falhou/não achou, retorna erro ou vazio
+  return { sucesso: false, mensagem: 'Cliente não encontrado' }
 }
 
 export async function pesquisarPessoas(termo: string) {
-  // 1. Tentar buscar do Supabase (Prioridade)
+  const { base } = cfg()
+  let apiResults: Pessoa[] = []
+  let apiError = false
+
+  // 1. Tentar buscar na API Real (Prioridade)
+  if (base) {
+    try {
+      const isDoc = /^\d+$/.test(termo)
+      const param = isDoc ? 'cpfcnpj' : 'nome'
+      
+      const url = `${base.replace(/\/$/, '')}/api/Pessoa/Get?${param}=${encodeURIComponent(termo)}`
+      const resp = await axios.get<any>(url, { headers: headers(), timeout: 10000 })
+      
+      const data = resp.data
+      if (data.Pessoas && Array.isArray(data.Pessoas)) {
+        apiResults = data.Pessoas
+      } else if (data.Pessoa && !Array.isArray(data.Pessoa)) {
+        apiResults = [data.Pessoa]
+      } else if (Array.isArray(data)) {
+        apiResults = data
+      }
+    } catch (err) {
+      console.error('Erro na pesquisa API LocApp:', err)
+      apiError = true
+    }
+  }
+
+  // 2. Tentar buscar do Supabase (Complemento/Fallback)
+  let supabaseResults: Pessoa[] = []
   if (supabase) {
     try {
-      const tLower = termo.toLowerCase()
       const tDoc = termo.replace(/\D/g, '')
-      
       let query = supabase.from('clientes').select('*').limit(20)
 
-      // Busca simples: se tem números, tenta cpf_cnpj, senão nome
       if (tDoc.length >= 3) {
          query = query.ilike('cpf_cnpj', `%${tDoc}%`)
       } else {
          query = query.or(`nome.ilike.%${termo}%,nome_fantasia.ilike.%${termo}%`)
       }
 
-      const { data, error } = await query
-      
+      const { data } = await query
       if (data && data.length > 0) {
-        return { sucesso: true, dados: data.map(mapSupabaseToPessoa) }
+        supabaseResults = data.map(mapSupabaseToPessoa)
       }
     } catch (err) {
       console.warn('Erro ao pesquisar Supabase:', err)
     }
   }
 
-  const { base } = cfg()
-  
-  // Search in local mock data (ONLY IN DEV)
-  const isDev = env.NODE_ENV !== 'production'
-  const tLower = termo.toLowerCase()
-  const localResults = isDev ? (clientesPostman as any[]).filter(p => {
-    const nome = (p.Nome || '').toLowerCase()
-    const fantasia = (p.NomeFantasia || '').toLowerCase()
-    const doc = (p.CpfCnpj || '').replace(/\D/g, '')
-    const tDoc = termo.replace(/\D/g, '')
+  // Combinar Resultados (API > Supabase)
+  // Remove duplicatas por CPF/CNPJ
+  const combined = [...apiResults, ...supabaseResults]
+  const seen = new Set()
+  const uniqueResults: Pessoa[] = []
 
-    return nome.includes(tLower) || 
-           fantasia.includes(tLower) || 
-           (tDoc.length >= 3 && doc.includes(tDoc))
-  }) as Pessoa[] : []
-
-  if (!base) {
-    if (!isDev) throw new Error('LOCAPP_BASE_URL ausente em produção')
-    // If no API configured, return local results (dev only)
-    return { sucesso: true, dados: localResults }
+  for (const p of combined) {
+    if (p.CpfCnpj && !seen.has(p.CpfCnpj)) {
+      seen.add(p.CpfCnpj)
+      uniqueResults.push(p)
+    }
   }
 
-  // Try searching by generic 'q' parameter or 'nome'/'cpfcnpj' based on input
-  // Assuming the API supports a generic search or filter
-  const isDoc = /^\d+$/.test(termo)
-  const param = isDoc ? 'cpfcnpj' : 'nome'
-  
-  const url = `${base.replace(/\/$/, '')}/api/Pessoa/Get?${param}=${encodeURIComponent(termo)}`
-  
-  try {
-    const resp = await axios.get<any>(url, { headers: headers(), timeout: 10000 })
-    
-    // Normalize response: API might return { Pessoa: {...} } or { Pessoas: [...] } or { Dados: [...] }
-    const data = resp.data
-    let lista: Pessoa[] = []
-    
-    if (data.Pessoas && Array.isArray(data.Pessoas)) {
-      lista = data.Pessoas
-    } else if (data.Pessoa && !Array.isArray(data.Pessoa)) {
-      lista = [data.Pessoa]
-    } else if (Array.isArray(data)) {
-      lista = data
-    }
-
-    // Merge with local results, avoiding duplicates by CpfCnpj
-    const seen = new Set(lista.map(p => p.CpfCnpj))
-    for (const p of localResults) {
-      if (!seen.has(p.CpfCnpj)) {
-        lista.push(p)
-        seen.add(p.CpfCnpj)
-      }
-    }
-
-    return { sucesso: true, dados: lista }
-  } catch (err) {
-    console.error('Erro na pesquisa (API falhou, retornando local):', err)
-    // If API fails, return local results
-    return { sucesso: true, dados: localResults }
-  }
+  return { sucesso: true, dados: uniqueResults }
 }
 
 

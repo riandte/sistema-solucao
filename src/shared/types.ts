@@ -81,7 +81,11 @@ export interface Pendencia {
 
   // Responsabilidades (Auditoria de Atores)
   criadoPor: string; // ID do usuário que criou (Sistema ou Humano)
+  criador?: { id: string; name: string }; // Objeto expandido (opcional)
+  
   responsavelId?: string; // ID do usuário atribuído para execução (Opcional no início)
+  responsavel?: { id: string; name: string }; // Objeto expandido (opcional)
+  
   setorResponsavel?: SetorResponsavel; // Atribuição por setor (Novo)
 
   // Encerramento

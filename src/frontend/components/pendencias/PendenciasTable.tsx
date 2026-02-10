@@ -2,6 +2,7 @@
 "use client"
 
 import { Pendencia, StatusPendencia } from '@/shared/types'
+import { Formatters } from '@/shared/formatters'
 import { AlertCircle, ChevronLeft, ChevronRight, Printer } from 'lucide-react'
 
 interface PendenciasTableProps {
@@ -73,7 +74,7 @@ export function PendenciasTable({ pendencias, onMove, onClick, movingId }: Pende
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className="text-xs font-medium text-gray-300 bg-gray-800 px-2 py-1 rounded border border-white/5">
-                                                {p.tipo}
+                                                {Formatters.pendencyType(p.tipo)}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
@@ -82,17 +83,17 @@ export function PendenciasTable({ pendencias, onMove, onClick, movingId }: Pende
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${statusColors[p.status] || 'text-gray-400'}`}>
-                                                {p.status.replace('_', ' ')}
+                                                {Formatters.status(p.status)}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
                                              <span className={`px-2 py-1 rounded text-xs font-bold border ${priorityColors[p.prioridade] || priorityColors.MEDIA}`}>
-                                                {p.prioridade}
+                                                {Formatters.priority(p.prioridade)}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-xs">
-                                            {p.responsavelId ? (
-                                                <span className="text-gray-300">{p.responsavelId}</span>
+                                            {p.responsavel ? (
+                                                <span className="text-gray-300">{p.responsavel.name}</span>
                                             ) : p.setorResponsavel ? (
                                                 <span className="text-blue-400 font-medium bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
                                                     {p.setorResponsavel}
@@ -102,7 +103,7 @@ export function PendenciasTable({ pendencias, onMove, onClick, movingId }: Pende
                                             )}
                                         </td>
                                         <td className="px-6 py-4">
-                                            {new Date(p.dataCriacao).toLocaleDateString('pt-BR')}
+                                            {Formatters.shortDate(p.dataCriacao)}
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex items-center justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">

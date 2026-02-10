@@ -32,7 +32,9 @@ function mapPrismaPendencyToAppPendency(p: any): Pendencia {
     origemId: p.originOsId || undefined,
     origemTipo: p.originType as OrigemPendencia,
     criadoPor: p.createdBy,
+    criador: p.creator ? { id: p.creator.id, name: p.creator.name } : undefined,
     responsavelId: p.responsibleId || undefined,
+    responsavel: p.responsible ? { id: p.responsible.id, name: p.responsible.name } : undefined,
     setorResponsavel: p.responsibleSectorId || undefined,
     conclusao: p.conclusionText || undefined,
     tipoEncerramento: p.conclusionType === 'CONCLUIDO' ? 'CONCLUIDO' : 
@@ -129,7 +131,11 @@ export const PendenciaService = {
 
     const pendencias = await prisma.pendency.findMany({
         where,
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
+        include: {
+          creator: { select: { id: true, name: true } },
+          responsible: { select: { id: true, name: true } }
+        }
     });
 
     return pendencias.map(mapPrismaPendencyToAppPendency);

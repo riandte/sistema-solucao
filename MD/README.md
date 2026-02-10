@@ -60,7 +60,7 @@ O projeto foi construído com as tecnologias mais recentes do mercado:
    Crie um arquivo `.env.local` na raiz do projeto e configure as credenciais de acesso à API:
 
    ```env
-   LOCAPP_BASE_URL=http://homolog.locapp.com.br/
+   LOCAPP_BASE_URL=https://sistema.locapp.com.br/
    LOCAPP_CNPJ=SEU_CNPJ
    LOCAPP_SECRET=SEU_TOKEN_SECRET
    API_SECRET_KEY=sua-chave-interna-segura

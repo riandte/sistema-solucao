@@ -7,6 +7,7 @@ interface KPICardProps {
   trend?: {
     value: string
     isPositive: boolean
+    isUpwards?: boolean
   }
   color?: 'blue' | 'purple' | 'emerald' | 'amber' | 'red'
 }
@@ -20,6 +21,9 @@ export function KPICard({ title, value, icon: Icon, trend, color = 'blue' }: KPI
     red: 'bg-red-500/10 text-red-500 border-red-500/20',
   }
 
+  // Determine arrow direction: explicit isUpwards > inferred from isPositive
+  const showUpArrow = trend?.isUpwards ?? trend?.isPositive;
+
   return (
     <div className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/[0.07] transition-all duration-300">
       <div className="flex items-start justify-between mb-4">
@@ -28,7 +32,7 @@ export function KPICard({ title, value, icon: Icon, trend, color = 'blue' }: KPI
         </div>
         {trend && (
           <div className={`flex items-center gap-1 text-xs font-medium ${trend.isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
-            {trend.isPositive ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+            {showUpArrow ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
             {trend.value}
           </div>
         )}

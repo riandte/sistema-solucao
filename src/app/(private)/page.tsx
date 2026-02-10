@@ -4,22 +4,29 @@ import { ActivityFeed, ActivityItem } from '@/frontend/components/dashboard/Acti
 import { SystemStatus } from '@/frontend/components/dashboard/SystemStatus'
 import { QuickActions } from '@/frontend/components/dashboard/QuickActions'
 import { prisma } from '@/backend/db'
+import { startOfMonth, subMonths, startOfDay } from 'date-fns'
 
 // Force dynamic rendering to ensure real-time data
 export const dynamic = 'force-dynamic'
 
 async function getDashboardData() {
+  const startTime = performance.now();
   const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const yesterday = new Date(now);
-  yesterday.setDate(yesterday.getDate() - 1);
-
+  
+  // Date ranges for KPI trends
+  const currentMonthStart = startOfMonth(now);
+  const lastMonthStart = startOfMonth(subMonths(now, 1));
+  const todayStart = startOfDay(now);
+  
   // 1. Fetch KPI Counts in parallel
   const [
     pendingCount,
     inProgressCount,
     completedMonthCount,
+    completedLastMonthCount,
+    createdTodayCount,
     activeUsersCount,
+    usersCreatedMonthCount,
     recentActivities
   ] = await Promise.all([
     prisma.pendency.count({ where: { status: 'PENDENTE' } }),
@@ -27,10 +34,27 @@ async function getDashboardData() {
     prisma.pendency.count({ 
       where: { 
         status: 'CONCLUIDO',
-        updatedAt: { gte: startOfMonth }
+        updatedAt: { gte: currentMonthStart }
       } 
     }),
+    prisma.pendency.count({ 
+      where: { 
+        status: 'CONCLUIDO',
+        updatedAt: { gte: lastMonthStart, lt: currentMonthStart }
+      } 
+    }),
+    prisma.pendency.count({
+      where: {
+        createdAt: { gte: todayStart }
+      }
+    }),
     prisma.user.count({ where: { active: true } }),
+    prisma.user.count({
+      where: {
+        active: true,
+        createdAt: { gte: currentMonthStart }
+      }
+    }),
     
     // 2. Fetch Recent Audit Logs for Activity Feed
     prisma.auditEvent.findMany({
@@ -45,6 +69,9 @@ async function getDashboardData() {
       }
     })
   ]);
+
+  const endTime = performance.now();
+  const dbLatency = Math.round(endTime - startTime);
 
   // Transform AuditEvents to ActivityItems
   const activities: ActivityItem[] = await Promise.all(recentActivities.map(async (log) => {
@@ -94,14 +121,39 @@ async function getDashboardData() {
     };
   }));
 
+  // Calculate trends
+  const completedDiff = completedMonthCount - completedLastMonthCount;
+  const completedTrend = {
+    value: `${completedDiff >= 0 ? '+' : ''}${completedDiff} vs mês anterior`,
+    isPositive: completedDiff >= 0
+  };
+
+  const usersTrend = {
+    value: `+${usersCreatedMonthCount} este mês`,
+    isPositive: true
+  };
+
+  const pendingTrend = {
+    value: `+${createdTodayCount} hoje`,
+    isPositive: false, // More pending is neutral/negative context dependent, but let's keep it informative
+    isUpwards: true
+  };
+
   return {
     kpis: {
       pending: pendingCount,
+      pendingTrend,
       inProgress: inProgressCount,
       completedMonth: completedMonthCount,
-      activeUsers: activeUsersCount
+      completedTrend,
+      activeUsers: activeUsersCount,
+      usersTrend
     },
-    activities
+    activities,
+    system: {
+      dbLatency,
+      dbStatus: 'connected' as const
+    }
   };
 }
 
@@ -122,8 +174,7 @@ export default async function DashboardPage() {
           value={data.kpis.pending} 
           icon={AlertTriangle} 
           color="amber"
-          // Trend could be calculated by comparing with yesterday if we had historical snapshots
-          // For now, we'll omit trend or keep it static until we implement history stats
+          trend={data.kpis.pendingTrend}
         />
         <KPICard 
           title="Em Andamento" 
@@ -136,13 +187,14 @@ export default async function DashboardPage() {
           value={data.kpis.completedMonth} 
           icon={CheckCircle2} 
           color="emerald"
-          trend={{ value: 'Este mês', isPositive: true }}
+          trend={data.kpis.completedTrend}
         />
         <KPICard 
           title="Usuários Ativos" 
           value={data.kpis.activeUsers} 
           icon={Users} 
           color="purple"
+          trend={data.kpis.usersTrend}
         />
       </div>
 
@@ -158,7 +210,10 @@ export default async function DashboardPage() {
 
         {/* System Status - Takes up 1 column */}
         <div className="space-y-6">
-          <SystemStatus />
+          <SystemStatus 
+            dbLatency={data.system.dbLatency}
+            dbStatus={data.system.dbStatus}
+          />
           
           {/* Optional: Add another widget here like "Pending Approvals" or "My Tasks" */}
         </div>
