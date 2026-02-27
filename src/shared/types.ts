@@ -77,6 +77,7 @@ export interface Pendencia {
   // Relações e Vínculos
   // Se origemTipo === 'OS', origemId DEVE ser o ID da OS.
   origemId?: string; 
+  origemDisplayId?: string; // ID visual (Ex: CTR-001) para exibição
   origemTipo: OrigemPendencia;
 
   // Responsabilidades (Auditoria de Atores)
@@ -213,8 +214,11 @@ export interface OrdemServicoInput {
 
 export interface ServiceOrder {
   id: string;
-  number: number;
-  clientData: any; // Pode tipar melhor se quiser
+  contractId?: string;
+  contractNumber?: string;
+  sequence?: number;
+  displayId?: string; // Mapped from numero_os
+  clientData: any;
   status: 'ABERTA' | 'EM_ANDAMENTO' | 'CONCLUIDA' | 'CANCELADA';
   priority: PrioridadePendencia;
   description: string;

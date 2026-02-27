@@ -30,6 +30,7 @@ function mapPrismaPendencyToAppPendency(p: any): Pendencia {
     status: p.status as StatusPendencia,
     prioridade: p.priority as PrioridadePendencia,
     origemId: p.originOsId || undefined,
+    origemDisplayId: p.originOs?.displayId || p.originOs?.numero_os || undefined,
     origemTipo: p.originType as OrigemPendencia,
     criadoPor: p.createdBy,
     criador: p.creator ? { id: p.creator.id, name: p.creator.name } : undefined,
@@ -134,7 +135,8 @@ export const PendenciaService = {
         orderBy: { createdAt: 'desc' },
         include: {
           creator: { select: { id: true, name: true } },
-          responsible: { select: { id: true, name: true } }
+          responsible: { select: { id: true, name: true } },
+          originOs: { select: { displayId: true } }
         }
     });
 
@@ -181,6 +183,9 @@ export const PendenciaService = {
               responsibleId: responsibleId,
               responsibleSectorId: responsibleSectorId,
               dueDate: dados.dataPrevisao ? new Date(dados.dataPrevisao) : null
+          },
+          include: {
+              originOs: { select: { displayId: true } }
           }
       });
       

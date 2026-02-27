@@ -6,9 +6,15 @@ import { PendenciaService } from './pendenciaService';
 import { Priority } from '@prisma/client';
 
 function mapPrismaToApp(os: any): ServiceOrder {
+  // O displayId agora vem diretamente do banco (numero_os)
+  const displayId = os.displayId || os.numero_os || os.id;
+
   return {
     id: os.id,
-    number: os.number,
+    contractId: os.contractId,
+    contractNumber: os.contract?.contractNumber, // Se incluiu relation
+    sequence: os.sequence,
+    displayId,
     clientData: os.clientData,
     status: os.status,
     priority: os.priority,
@@ -33,7 +39,8 @@ export const ServiceOrderService = {
 
     // 2. Busca no Banco
     const orders = await prisma.serviceOrder.findMany({
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
+        include: { contract: true }
     });
 
     return orders.map(mapPrismaToApp);
@@ -49,75 +56,104 @@ export const ServiceOrderService = {
           throw new Error('Acesso negado.');
       }
 
-      const os = await prisma.serviceOrder.findUnique({ where: { id } });
+      const os = await prisma.serviceOrder.findUnique({ 
+        where: { id },
+        include: { contract: true }
+      });
       return os ? mapPrismaToApp(os) : null;
   },
 
   async create(data: OrdemServicoInput, context: AuthContext): Promise<ServiceOrder> {
     await assertPermission(context, 'OS:CRIAR');
 
-    // 1. Lógica de ID Personalizado (Contrato)
-    let customId: string | undefined;
-
-    if (data.contrato) {
-        const prefix = `${data.contrato}-`;
-        // Busca IDs que começam com o prefixo para determinar o próximo sequencial
-        const existing = await prisma.serviceOrder.findMany({
-            where: {
-                id: { startsWith: prefix }
-            },
-            select: { id: true }
-        });
-
-        let maxSeq = 0;
-        for (const order of existing) {
-            const parts = order.id.split('-');
-            if (parts.length === 2 && parts[0] === String(data.contrato)) {
-                const seq = parseInt(parts[1], 10);
-                if (!isNaN(seq) && seq > maxSeq) maxSeq = seq;
-            }
-        }
-        customId = `${data.contrato}-${maxSeq + 1}`;
+    if (!data.contrato) {
+       throw new Error('É obrigatório informar o número do Contrato para criar uma OS.');
     }
 
-    // 2. Transação: Criar OS + Criar Pendência
+    const contractNumber = String(data.contrato);
+
+    // 2. Transação: Gerenciar Contrato -> Chamar RPC -> Atualizar Dados -> Criar Pendência
     return prisma.$transaction(async (tx) => {
-        const os = await tx.serviceOrder.create({
-            data: {
-                id: customId, // Se undefined, usa UUID v4
-                description: data.descricao,
-                priority: data.prioridade as Priority,
-                scheduledDate: new Date(data.dataPrevista),
-                clientData: {
-                    nome: data.cliente.nome,
-                    codigo: data.cliente.codigo,
-                    documento: data.cliente.documento,
-                    endereco: data.endereco,
-                    contato: data.contato,
-                    contrato: data.contrato
-                },
-                status: 'ABERTA'
-            }
+        // A. Busca ou Cria Contrato
+        let contract = await tx.contract.findUnique({
+            where: { contractNumber }
         });
 
-        // Determina título de exibição
-        // Se usou ID customizado, usa ele. Se não, usa o número sequencial (autoincrement)
-        const displayId = customId || os.number;
+        if (!contract) {
+            contract = await tx.contract.create({
+                data: {
+                    contractNumber,
+                    status: 'ATIVO'
+                }
+            });
+        } else {
+            if (contract.status !== 'ATIVO') {
+                throw new Error(`O contrato ${contractNumber} está ${contract.status} e não permite novas OS.`);
+            }
+        }
 
-        // Criação da Pendência Vinculada
+        // B. Chama RPC para criar a OS de forma atômica (passando todos os dados)
+        let result: any[];
+        try {
+            const clientData = {
+                nome: data.cliente.nome,
+                codigo: data.cliente.codigo,
+                documento: data.cliente.documento,
+                endereco: data.endereco,
+                contato: data.contato,
+                contrato: data.contrato
+            };
+
+            const scheduledDate = new Date(data.dataPrevista);
+
+            // Usa SELECT * FROM para expandir o retorno do tipo composto (service_orders)
+            result = await tx.$queryRaw<any[]>`
+                SELECT * FROM criar_ordem_servico(
+                    ${contract.id}, 
+                    ${data.descricao}, 
+                    ${data.prioridade}::"Priority", 
+                    ${scheduledDate}::timestamp, 
+                    ${clientData}::jsonb
+                )
+            `;
+        } catch (error: any) {
+            // Tenta extrair mensagem de erro do banco
+            const message = error?.message || 'Erro desconhecido na RPC';
+            throw new Error(`Falha ao gerar OS via RPC: ${message}`);
+        }
+
+        // Verifica retorno
+        if (!result || result.length === 0 || !result[0].id) {
+             throw new Error('Falha ao gerar Ordem de Serviço via RPC (retorno inválido ou vazio).');
+        }
+
+        const newOsId = result[0].id;
+
+        // C. Busca a OS completa recém-criada (sem necessidade de UPDATE posterior)
+        const os = await tx.serviceOrder.findUnique({
+            where: { id: newOsId },
+            include: { contract: true }
+        });
+
+        if (!os) {
+            throw new Error('OS criada não encontrada no banco de dados.');
+        }
+
+        const displayId = os.displayId; // Já vem do banco (numero_os)
+
+        // D. Criação da Pendência Vinculada
         await PendenciaService.criar({
             titulo: `OS #${displayId} - ${data.cliente.nome}`,
             descricao: data.descricao || data.observacoes || 'Gerado automaticamente via OS',
             tipo: 'OS',
             status: 'PENDENTE',
             prioridade: data.prioridade,
-            origemId: os.id, // Link físico via UUID (ou customId)
+            origemId: os.id, // Link físico via UUID
             origemTipo: 'OS',
             criadoPor: context.user.id,
-            responsavelId: context.user.id, // Quem criou a OS é o responsável inicial? Route.ts usava session.user.id
+            responsavelId: context.user.id, 
             dataPrevisao: data.dataPrevista,
-            // Tags são aceitas pela interface mas ignoradas na persistência atual do PendenciaService
-            tags: [data.cliente.nome, data.contrato ? `Contrato: ${data.contrato}` : ''].filter(Boolean) as string[]
+            tags: [data.cliente.nome, `Contrato: ${contractNumber}`]
         }, context, tx);
 
         return mapPrismaToApp(os);

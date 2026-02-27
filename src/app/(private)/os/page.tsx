@@ -7,12 +7,15 @@ import { Plus, Search, Filter, FileText, AlertCircle } from 'lucide-react'
 
 interface ServiceOrder {
   id: string
-  Nome: string
-  Contrato?: string
-  prioridade: string
+  displayId?: string
+  clientData: {
+    nome: string
+  }
+  contractNumber?: string
+  priority: string
   status?: string
   createdAt: string
-  Descricao?: string
+  description?: string
 }
 
 export default function OSListPage() {
@@ -38,8 +41,8 @@ export default function OSListPage() {
   }, [])
 
   const filteredOrders = orders.filter(order => 
-    order.Nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.id.toLowerCase().includes(searchTerm.toLowerCase())
+    order.clientData?.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (order.displayId || order.contractNumber || order.id).toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const priorityColors: Record<string, string> = {
@@ -111,15 +114,15 @@ export default function OSListPage() {
                     <tbody className="divide-y divide-white/5">
                         {filteredOrders.map((os) => (
                             <tr key={os.id} className="hover:bg-white/5 transition-colors">
-                                <td className="px-6 py-4 font-medium text-white">#{os.id}</td>
+                                <td className="px-6 py-4 font-medium text-white">#{os.displayId || os.id}</td>
                                 <td className="px-6 py-4">
-                                    <div className="font-medium text-gray-200">{os.Nome}</div>
-                                    <div className="text-xs text-gray-500 truncate max-w-[200px]">{os.Descricao}</div>
+                                    <div className="font-medium text-gray-200">{os.clientData?.nome || 'Cliente sem nome'}</div>
+                                    <div className="text-xs text-gray-500 truncate max-w-[200px]">{os.description}</div>
                                 </td>
-                                <td className="px-6 py-4">{os.Contrato || '-'}</td>
+                                <td className="px-6 py-4">{os.contractNumber || '-'}</td>
                                 <td className="px-6 py-4">
-                                    <span className={`px-2 py-1 rounded text-xs font-bold border ${priorityColors[os.prioridade?.toLowerCase()] || priorityColors['media']}`}>
-                                        {os.prioridade?.toUpperCase() || 'NORMAL'}
+                                    <span className={`px-2 py-1 rounded text-xs font-bold border ${priorityColors[os.priority?.toLowerCase()] || priorityColors['media']}`}>
+                                        {os.priority?.toUpperCase() || 'NORMAL'}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4">
@@ -143,6 +146,7 @@ export default function OSListPage() {
             </div>
         </div>
       )}
+
 
     </div>
   )

@@ -171,9 +171,11 @@ export async function checkApiStatus() {
   }
 
   try {
-    // Tenta um endpoint leve ou uma busca que sabemos que falhará rápido mas testará a conexão
-    // Usando um nome impossível para garantir retorno vazio rápido se conectar
-    const url = `${base.replace(/\/$/, '')}/api/Pessoa/Get?nome=HealthCheckPing`
+    // Tenta listar contratos (endpoint leve que retorna lista vazia ou erro de auth rápido)
+    // O endpoint de Pessoa/Get exigia CPF/CNPJ e causava erro 400
+    const url = `${base.replace(/\/$/, '')}/api/Contrato/Get`
+    // Limitamos a 1 resultado se possível para economizar banda, mas a API pode ignorar
+    // Se a API suportar paginação na query string, seria ideal, mas sem docs, vamos no default
     await axios.get(url, { headers: headers(), timeout: 5000 })
     
     // Se passar (200 OK), está ótimo

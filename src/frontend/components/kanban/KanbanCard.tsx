@@ -60,7 +60,7 @@ export function KanbanCard({ pendencia, onMove, onClick, isMoving }: KanbanCardP
                 </span>
                 {pendencia.origemTipo === 'OS' && (
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 border border-purple-500/30">
-                        OS #{pendencia.origemId}
+                        OS #{pendencia.origemDisplayId || pendencia.origemId}
                     </span>
                 )}
                  {pendencia.tipo === 'FINANCEIRO' && (

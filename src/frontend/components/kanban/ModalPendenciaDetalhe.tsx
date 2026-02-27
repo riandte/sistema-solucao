@@ -61,10 +61,7 @@ export function ModalPendenciaDetalhe({ pendencia, onClose }: ModalPendenciaDeta
                 <div className="bg-gray-800/50 p-3 rounded-lg border border-white/5">
                     <span className="text-xs text-gray-500 block mb-1">Origem</span>
                     <span className="text-sm text-white flex items-center gap-1">
-                        {Formatters.origin(pendencia.origemTipo, pendencia.origemId)}
-                        {/* Se tiver ID mas for OS, o Formatters.origin já retorna texto amigável. 
-                            Se quisermos mostrar o número, precisaríamos ter o objeto OS populado.
-                            Por enquanto, removemos a exibição do ID cru. */}
+                        {Formatters.origin(pendencia.origemTipo, pendencia.origemId, pendencia.origemDisplayId)}
                     </span>
                 </div>
             </div>

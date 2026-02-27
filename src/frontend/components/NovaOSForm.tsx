@@ -91,7 +91,7 @@ export default function NovaOSForm({ user }: { user: any }) {
     win.document.write(`
       <html>
         <head>
-          <title>Ordem de Serviço #${createdOS.id || 'Nova'}</title>
+          <title>Ordem de Serviço #${createdOS.displayId || createdOS.id || 'Nova'}</title>
           <style>
             body { font-family: Arial, sans-serif; padding: 40px; color: #333; }
             h1 { color: #2563eb; border-bottom: 2px solid #eee; padding-bottom: 10px; }
@@ -106,7 +106,7 @@ export default function NovaOSForm({ user }: { user: any }) {
         </head>
         <body>
           <div class="header">
-            <h1>Ordem de Serviço ${createdOS.id ? '#' + createdOS.id : ''}</h1>
+            <h1>Ordem de Serviço ${createdOS.displayId ? 'N° ' + createdOS.displayId : (createdOS.id ? '#' + createdOS.id : '')}</h1>
             <p>Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
           </div>
           

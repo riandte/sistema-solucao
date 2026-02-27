@@ -49,12 +49,12 @@ export const Formatters = {
     return map[type] || type
   },
 
-  origin: (type: string, id?: string | null): string => {
+  origin: (type: string, id?: string | null, displayId?: string | null): string => {
     if (type === 'OS') {
-        // Se tivermos o ID, idealmente deveríamos mostrar o número, 
-        // mas sem acesso ao banco aqui, melhor mostrar um texto amigável.
-        // Se o frontend tiver o objeto da OS populado, deve usar ele.
-        // Aqui é o fallback.
+        if (displayId) return `Ordem de Serviço #${displayId}`
+        // Fallback para ID curto se não tiver displayId
+        if (id && id.length > 8) return `Ordem de Serviço #${id.slice(0, 8)}`
+        if (id) return `Ordem de Serviço #${id}`
         return 'Ordem de Serviço'
     }
     if (type === 'MANUAL') return 'Manual'

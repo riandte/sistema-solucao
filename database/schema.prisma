@@ -121,9 +121,20 @@ model Employee {
   @@map("employees")
 }
 
+model Contract {
+  id             String         @id @default(uuid())
+  contractNumber String         @unique @map("numero_contrato")
+  status         ContractStatus
+  serviceOrders  ServiceOrder[]
+
+  @@map("contracts")
+}
+
 model ServiceOrder {
   id                String             @id @default(uuid())
-  number            Int                @default(autoincrement())
+  contractId        String             @map("contract_id")
+  sequence          Int                @map("sequencial")
+  displayId         String             @map("numero_os")
   clientData        Json               @map("client_data")
   status            ServiceOrderStatus @default(ABERTA)
   priority          Priority           @default(MEDIA)
@@ -132,7 +143,9 @@ model ServiceOrder {
   createdAt         DateTime           @default(now()) @map("created_at")
   updatedAt         DateTime           @default(now()) @updatedAt @map("updated_at")
   derivedPendencies Pendency[]
+  contract          Contract           @relation(fields: [contractId], references: [id])
 
+  @@unique([contractId, sequence])
   @@map("service_orders")
 }
 
@@ -246,4 +259,10 @@ enum OriginType {
 enum ConclusionType {
   CONCLUIDO
   SEM_CONCLUSAO
+}
+
+enum ContractStatus {
+  ATIVO
+  ENCERRADO
+  SUSPENSO
 }
