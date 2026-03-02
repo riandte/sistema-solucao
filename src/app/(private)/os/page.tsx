@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Plus, Search, Filter, FileText, AlertCircle } from 'lucide-react'
+import { ModalOSDetalhe } from '@/frontend/components/os/ModalOSDetalhe'
 
 interface ServiceOrder {
   id: string
@@ -22,6 +23,7 @@ export default function OSListPage() {
   const [orders, setOrders] = useState<ServiceOrder[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedOSId, setSelectedOSId] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadOrders() {
@@ -135,10 +137,13 @@ export default function OSListPage() {
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 text-right">
-                                    <button className="text-blue-400 hover:text-blue-300 transition-colors font-medium text-xs">
-                                        Ver Detalhes
-                                    </button>
-                                </td>
+                                <button 
+                                    onClick={() => setSelectedOSId(os.id)}
+                                    className="text-blue-400 hover:text-blue-300 transition-colors font-medium text-xs"
+                                >
+                                    Ver Detalhes
+                                </button>
+                            </td>
                             </tr>
                         ))}
                     </tbody>
@@ -147,7 +152,9 @@ export default function OSListPage() {
         </div>
       )}
 
-
+      {selectedOSId && (
+        <ModalOSDetalhe osId={selectedOSId} onClose={() => setSelectedOSId(null)} />
+      )}
     </div>
   )
 }

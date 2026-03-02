@@ -103,6 +103,13 @@ export interface Pendencia {
   tags?: string[]; // Marcadores para busca rápida
 }
 
+export interface PendenciaFilter {
+  dataInicio?: string;
+  dataFim?: string;
+  termo?: string; // Busca em título/descrição/origemId
+  origemId?: string;
+}
+
 // --- CONTROLE DE ACESSO (RBAC) ---
 
 export type RoleName = string;

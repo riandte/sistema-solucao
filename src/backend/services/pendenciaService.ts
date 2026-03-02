@@ -3,7 +3,7 @@ import { Pendencia, StatusPendencia, TipoPendencia, PrioridadePendencia, OrigemP
 import { AuthContext } from '../auth/authContext';
 import { assertPermission, hasPermission, ForbiddenError } from '../auth/permissions';
 import { prisma } from '@/backend/db';
-import { PendencyStatus, PendencyType, Priority, OriginType, ConclusionType, Prisma } from '@prisma/client';
+import { PendencyStatus, PendencyType, Priority, OriginType, ConclusionType, Prisma, ServiceOrderStatus } from '@prisma/client';
 import { AuditService } from '@/backend/auth/audit';
 
 // Helper de Auditoria (Mantido para compatibilidade, mas idealmente seria salvo no banco)
@@ -57,6 +57,7 @@ export interface PendenciaFilters {
   dataInicio?: string;
   dataFim?: string;
   termo?: string; // Busca em título/descrição/origemId
+  origemId?: string;
 }
 
 export const PendenciaService = {
@@ -100,6 +101,7 @@ export const PendenciaService = {
         if (filters.responsavelId) where.responsibleId = filters.responsavelId;
         if (filters.setorResponsavel) where.responsibleSectorId = filters.setorResponsavel;
         if (filters.criadoPor) where.createdBy = filters.criadoPor;
+        if (filters.origemId) where.originOsId = filters.origemId;
         
         if (filters.dataInicio || filters.dataFim) {
             where.createdAt = {};
@@ -200,7 +202,10 @@ export const PendenciaService = {
 
   async atualizar(id: string, dados: Partial<Pendencia>, context: AuthContext): Promise<Pendencia | null> {
     try {
-      const original = await prisma.pendency.findUnique({ where: { id } });
+      const original = await prisma.pendency.findUnique({ 
+        where: { id },
+        include: { originOs: true }
+      });
       if (!original) return null;
 
       // --- VALIDAÇÕES DE PERMISSÃO ---
@@ -302,33 +307,71 @@ export const PendenciaService = {
           }
 
           // 3. Automação: Financeiro
-          if (original.type === 'OS' && dados.status === 'CONCLUIDO' && original.status !== 'CONCLUIDO') {
-              await tx.pendency.create({
-                  data: {
-                      title: `Faturamento OS #${original.originOsId || original.title}`,
-                      description: `Gerado automaticamente após conclusão da OS #${original.originOsId || original.title}. Referência: ${original.title}`,
-                      type: 'FINANCEIRO',
-                      status: 'PENDENTE',
-                      priority: 'MEDIA',
-                      originType: 'OS',
-                      originOsId: original.originOsId,
-                      createdBy: context.user.id, // Automator is the user who concluded the OS
-                      // Se 'system-automation' não é um UUID válido na tabela Users, vai dar erro de FK.
-                      // Melhor usar o context.user.id ou um ID de sistema fixo se existir.
-                      // Vou usar context.user.id por segurança de FK, ou deixar nulo se createdBy fosse opcional (mas não é).
-                      // Vou assumir que quem concluiu a OS disparou o faturamento.
-                      // createdBy: context.user.id 
-                  }
-              });
-              // Nota: 'createdBy' é FK para User. Se eu usar 'system-automation', deve existir esse user.
-              // Como não tenho garantia, vou usar o ID do usuário atual.
+          if (original.type === 'OS' && original.originOsId) {
+              const osDisplayId = original.originOs?.displayId || original.originOsId;
+
+              // A. Criar Faturamento ao Concluir OS
+              if (dados.status === 'CONCLUIDO' && original.status !== 'CONCLUIDO') {
+                  await tx.pendency.create({
+                      data: {
+                          title: `Faturamento OS #${osDisplayId}`,
+                          description: `Gerado automaticamente após conclusão da OS #${osDisplayId}. Referência: ${original.title}`,
+                          type: 'FINANCEIRO',
+                          status: 'PENDENTE',
+                          priority: 'MEDIA',
+                          originType: 'OS',
+                          originOsId: original.originOsId,
+                          createdBy: context.user.id,
+                      }
+                  });
+              }
+
+              // B. Remover Faturamento ao Reabrir OS
+              if (original.status === 'CONCLUIDO' && dados.status && dados.status !== 'CONCLUIDO') {
+                  // Se a OS está sendo reaberta, removemos o faturamento pendente para evitar duplicidade
+                  await tx.pendency.deleteMany({
+                      where: {
+                          type: 'FINANCEIRO',
+                          originOsId: original.originOsId,
+                          status: 'PENDENTE' // Apenas remove se ainda não foi processado
+                      }
+                  });
+              }
+          }
+
+          // 4. Sincronização de Status da OS
+          // Apenas a pendência principal do tipo 'OS' deve alterar o status da OS
+          if (original.type === 'OS' && original.originType === 'OS' && original.originOsId && dados.status && dados.status !== original.status) {
+              let newOsStatus: ServiceOrderStatus | undefined;
+
+              switch (dados.status as PendencyStatus) {
+                  case 'PENDENTE':
+                      newOsStatus = 'ABERTA';
+                      break;
+                  case 'EM_ANDAMENTO':
+                      newOsStatus = 'EM_ANDAMENTO';
+                      break;
+                  case 'CONCLUIDO':
+                      newOsStatus = 'CONCLUIDA';
+                      break;
+                  case 'ENCERRADA_SEM_CONCLUSAO':
+                      newOsStatus = 'CANCELADA';
+                      break;
+                  case 'CANCELADO':
+                      newOsStatus = 'CANCELADA';
+                      break;
+              }
+
+              if (newOsStatus) {
+                  await tx.serviceOrder.update({
+                      where: { id: original.originOsId },
+                      data: { status: newOsStatus }
+                  });
+              }
           }
           
           return updated;
       });
-
-      // Correção da automação acima: Eu não posso alterar o bloco da transação depois de fechado ali.
-      // Vou ajustar o bloco acima para usar context.user.id na automação.
 
       logAudit('PENDENCIA_ATUALIZADA', context.user.id, id, { 
         changes: Object.keys(dados),
